@@ -8,64 +8,83 @@ import java.io.InputStreamReader;
 public class MultiplicationTable {
     public static void main(String[] args) {
 
-        int size = 32;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        int minWidthValue = (size + "|").length();
-        int maxWidthValue = ((size * size) + "|").length();
+        try {
 
-        String oneCellSplit = String.format("%" + minWidthValue + "s", "+").replace(" ", "-");
+            System.out.println("Введите размер таблицы умножения (от 1 до 32): ");
 
-        System.out.print(String.format("%" + (minWidthValue - 1) + "s|", ""));
-        for (int i = 1; i <= size; i++) {
+            while (true) {
 
-            if (i != size) {
-                System.out.print(String.format("%" + (maxWidthValue - 1) + "s|", i));
-            } else {
-                System.out.print(String.format("%" + (maxWidthValue - 1) + "s", i));
-            }
-        }
-        System.out.println();
+                int size = Integer.parseInt(reader.readLine());
 
-        System.out.print(oneCellSplit);
+                if (size >= 1 && size <= 32) {
 
-        out:
-        for (int i = 1; i <= size; i++) {
-            for (int j = 1; j < maxWidthValue; j++) {
-                System.out.print("-");
-                if (j == (maxWidthValue - 1) && i == size) {
-                    break out;
-                }
-            }
-            System.out.print("+");
-        }
-        System.out.println();
+                    int minWidthValue = (size + "|").length();
+                    int maxWidthValue = ((size * size) + "|").length();
 
-        for (int i = 1; i <= size; i++) {
-            System.out.print(String.format("%" + (minWidthValue - 1) + "s|", i));
-            for (int j = 1; j <= size; j++) {
-                if (j != size) {
-                    System.out.print(String.format("%" + (maxWidthValue - 1) + "s|", i * j));
-                } else {
-                    System.out.print(String.format("%" + (maxWidthValue - 1) + "s", i * j));
-                }
+                    String oneCellSplit = String.format("%" + minWidthValue + "s", "+").replace(" ", "-");
 
-            }
-            System.out.println();
+                    System.out.print(String.format("%" + (minWidthValue - 1) + "s|", ""));
+                    for (int i = 1; i <= size; i++) {
 
-            System.out.print(oneCellSplit);
-
-            out:
-            for (int k = 1; k <= size; k++) {
-                for (int j = 1; j < maxWidthValue; j++) {
-                    System.out.print("-");
-                    if (j == (maxWidthValue - 1) && k == size) {
-                        break out;
+                        if (i != size) {
+                            System.out.print(String.format("%" + (maxWidthValue - 1) + "s|", i));
+                        } else {
+                            System.out.print(String.format("%" + (maxWidthValue - 1) + "s", i));
+                        }
                     }
+                    System.out.println();
+
+                    System.out.print(oneCellSplit);
+
+                    out:
+                    for (int i = 1; i <= size; i++) {
+                        for (int j = 1; j < maxWidthValue; j++) {
+                            System.out.print("-");
+                            if (j == (maxWidthValue - 1) && i == size) {
+                                break out;
+                            }
+                        }
+                        System.out.print("+");
+                    }
+                    System.out.println();
+
+                    for (int i = 1; i <= size; i++) {
+                        System.out.print(String.format("%" + (minWidthValue - 1) + "s|", i));
+                        for (int j = 1; j <= size; j++) {
+                            if (j != size) {
+                                System.out.print(String.format("%" + (maxWidthValue - 1) + "s|", i * j));
+                            } else {
+                                System.out.print(String.format("%" + (maxWidthValue - 1) + "s", i * j));
+                            }
+
+                        }
+                        System.out.println();
+
+                        System.out.print(oneCellSplit);
+
+                        out:
+                        for (int k = 1; k <= size; k++) {
+                            for (int j = 1; j < maxWidthValue; j++) {
+                                System.out.print("-");
+                                if (j == (maxWidthValue - 1) && k == size) {
+                                    break out;
+                                }
+                            }
+                            System.out.print("+");
+                        }
+                        System.out.println();
+                    }
+
+
+                } else {
+                    System.out.println("Вы ввели данные некорректно, значения должно быть от 1 до 32");
                 }
-                System.out.print("+");
             }
-            System.out.println();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
 }
+
