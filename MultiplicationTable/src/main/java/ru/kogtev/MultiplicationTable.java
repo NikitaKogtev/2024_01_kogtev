@@ -8,45 +8,64 @@ import java.io.InputStreamReader;
 public class MultiplicationTable {
     public static void main(String[] args) {
 
-        int size = 10;
+        int size = 32;
 
         int minWidthValue = (size + "|").length();
         int maxWidthValue = ((size * size) + "|").length();
 
+        String oneCellSplit = String.format("%" + minWidthValue + "s", "+").replace(" ", "-");
 
-        // Выводим шапку таблицы
         System.out.print(String.format("%" + (minWidthValue - 1) + "s|", ""));
         for (int i = 1; i <= size; i++) {
-            System.out.print(String.format("%" + (maxWidthValue - 1) + "d|", i));
+
+            if (i != size) {
+                System.out.print(String.format("%" + (maxWidthValue - 1) + "s|", i));
+            } else {
+                System.out.print(String.format("%" + (maxWidthValue - 1) + "s", i));
+            }
         }
         System.out.println();
 
-        // Выводим разделитель
-        System.out.print(String.format("%" + minWidthValue + "s", "+").replace(" ", "-"));
+        System.out.print(oneCellSplit);
+
+        out:
         for (int i = 1; i <= size; i++) {
             for (int j = 1; j < maxWidthValue; j++) {
                 System.out.print("-");
+                if (j == (maxWidthValue - 1) && i == size) {
+                    break out;
+                }
             }
             System.out.print("+");
         }
         System.out.println();
 
-        //Выводим таблицу
         for (int i = 1; i <= size; i++) {
-            System.out.print(String.format("%" + (minWidthValue - 1) + "d|", i));
+            System.out.print(String.format("%" + (minWidthValue - 1) + "s|", i));
             for (int j = 1; j <= size; j++) {
-                System.out.print(String.format("%" + (maxWidthValue - 1) + "d|", i * j));
+                if (j != size) {
+                    System.out.print(String.format("%" + (maxWidthValue - 1) + "s|", i * j));
+                } else {
+                    System.out.print(String.format("%" + (maxWidthValue - 1) + "s", i * j));
+                }
+
             }
             System.out.println();
-            System.out.print(String.format("%" + minWidthValue + "s", "+").replace(" ", "-"));
+
+            System.out.print(oneCellSplit);
+
+            out:
             for (int k = 1; k <= size; k++) {
                 for (int j = 1; j < maxWidthValue; j++) {
                     System.out.print("-");
+                    if (j == (maxWidthValue - 1) && k == size) {
+                        break out;
+                    }
                 }
                 System.out.print("+");
             }
             System.out.println();
         }
-
     }
+
 }
