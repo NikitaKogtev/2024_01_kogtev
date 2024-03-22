@@ -1,45 +1,68 @@
 package ru.kogtev;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 public class MultiplicationTable {
-    public static void main(String[] args) {
+    private final int size;
 
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+    public MultiplicationTable(int size) {
+        this.size = size;
+    }
 
-            System.out.println("Введите размер таблицы умножения (от 1 до 32), для завершения работы программы введите - End:");
+    public void printMultiplicationTable() {
+        int minWidthValue = (size + "|").length();
+        int maxWidthValue = ((size * size) + "|").length();
+        int minSplitLineWidthValue = minWidthValue - 1;
+        int maxSplitLineWidthValue = maxWidthValue - 1;
 
-            boolean isInputEnd = true;
+        String oneCellSplit = String.format("%" + minWidthValue + "s", "+").replace(" ", "-");
+        String splitLine = String.format(createSplitLine(oneCellSplit, size, maxWidthValue, maxSplitLineWidthValue));
 
-            while (isInputEnd) {
+        printHeader(size, minSplitLineWidthValue, maxSplitLineWidthValue, splitLine);
+        printTable(size, minSplitLineWidthValue, maxSplitLineWidthValue, splitLine);
+    }
 
-                String input = reader.readLine();
+    private String createSplitLine(String oneCellSplit, int size, int maxWidthValue, int maxSplitLineWidthValue) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(oneCellSplit);
 
-                if (input.equals("End") || input.equals("end")) {
-                    isInputEnd = false;
-                    continue;
-                }
-
-                int size = Integer.parseInt(input);
-
-                if (size >= 1 && size <= 32) {
-
-                    Printer printer = new Printer(size);
-                    printer.printMultiplicationTable();
-
-                    System.out.println("Введите новый размер таблицы! Для завершения программы введите End");
-                } else {
-                    System.out.println("Вы ввели данные некорректно, значения должно быть от 1 до 32");
+        out:
+        for (int i = 1; i <= size; i++) {
+            for (int j = 1; j < maxWidthValue; j++) {
+                stringBuilder.append("-");
+                if (j == (maxSplitLineWidthValue) && i == size) {
+                    break out;
                 }
             }
-        } catch (IOException e) {
-            System.out.println("Ошибка ввода данных");
-        } catch (NumberFormatException ex) {
-            System.out.println("Введены некорректные данные, значение должно быть от 1 до 32");
+            stringBuilder.append("+");
+        }
+        return stringBuilder.toString();
+    }
+
+    private void printHeader(int size, int minSplitLineWidthValue, int maxSplitLineWidthValue, String splitLine) {
+        System.out.printf("%" + (minSplitLineWidthValue) + "s|", "");
+        for (int i = 1; i <= size; i++) {
+            if (i == size) {
+                System.out.printf("%" + (maxSplitLineWidthValue) + "s", i);
+            } else {
+                System.out.printf("%" + (maxSplitLineWidthValue) + "s|", i);
+            }
+        }
+        System.out.println();
+        System.out.println(splitLine);
+    }
+
+    private void printTable(int size, int minSplitLineWidthValue, int maxSplitLineWidthValue, String splitLine) {
+        for (int i = 1; i <= size; i++) {
+            System.out.printf("%" + (minSplitLineWidthValue) + "s|", i);
+            for (int j = 1; j <= size; j++) {
+                if (j == size) {
+                    System.out.printf("%" + (maxSplitLineWidthValue) + "s", i * j);
+                } else {
+                    System.out.printf("%" + (maxSplitLineWidthValue) + "s|", i * j);
+                }
+            }
+            System.out.println();
+            System.out.println(splitLine);
         }
     }
 }
-
