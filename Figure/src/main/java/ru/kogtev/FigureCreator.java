@@ -1,6 +1,6 @@
 package ru.kogtev;
 
-public class FigureFactory {
+public class FigureCreator {
     public static Figure createFigure(String typeReader, double[] params) {
         switch (typeReader) {
             case "CIRCLE":

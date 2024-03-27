@@ -2,7 +2,6 @@ package ru.kogtev;
 
 public class Circle implements Figure {
     private double radius;
-    private double diameter = 2 * radius;
 
     public Circle(double radius) {
         this.radius = radius;
@@ -25,6 +24,8 @@ public class Circle implements Figure {
 
     @Override
     public String getInfo() {
+        double diameter = 2 * radius;
+
         return String.format("Радиус: %.2f мм%nДиаметр: %.2f мм%n", radius, diameter);
     }
 }

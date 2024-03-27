@@ -17,19 +17,10 @@ public class Main {
 
         try {
             Figure figure = FigureReader.figureReaderFromFile(inputFilename);
-            String output = "Тип фигуры: " + figure.getName() + "\n" +
-                    "Площадь: " + figure.getArea() + " кв. мм\n" +
-                    "Периметр: " + figure.getPerimeter() + " мм\n" +
-                    figure.getInfo();
-
             if (outputParameter.equals("console")) {
-                System.out.println(output);
+                Printer.printFigureInConsole(figure);
             } else {
-                String outputFileName = "output.txt";
-
-                try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outputFileName))) {
-                    bufferedWriter.write(outputFileName);
-                }
+                Printer.printFigureInFile(figure);
             }
 
         } catch (IOException e) {

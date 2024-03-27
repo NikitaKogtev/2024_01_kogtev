@@ -5,12 +5,6 @@ public class Triangle implements Figure {
     private double secondSide;
     private double thirdSide;
 
-    private double firstSideAngle = Math.toDegrees(Math.acos(firstSide * firstSide + thirdSide * thirdSide -
-            firstSide * firstSide / (2 * secondSide * thirdSide)));
-    private double secondSideAngle = Math.toDegrees(Math.acos((firstSide * firstSide + thirdSide * thirdSide -
-            secondSide * secondSide) / (2 * firstSide * thirdSide)));
-    private double thirdSideAngle = 180 - firstSideAngle - secondSideAngle;
-
     public Triangle(double firstSide, double secondSide, double thirdSide) {
         this.firstSide = firstSide;
         this.secondSide = secondSide;
@@ -31,13 +25,21 @@ public class Triangle implements Figure {
     @Override
     public double getPerimeter() {
         return firstSide + secondSide + thirdSide;
+
     }
 
+    //Вернуться и вынести расчет углов в отдельный метод
     @Override
     public String getInfo() {
-        return String.format("Сторона 1: %.2f мм, Противоположный угол: %2.f градусов%n " +
-                        "Сторона 2: %.2f мм, Противоположный угол: %2.f градусов%n" +
-                        "Сторона 3: %.2f мм, Противоположный угол: %2.f градусов%n",
+        double firstSideAngle = Math.toDegrees(Math.acos((secondSide * secondSide + thirdSide * thirdSide -
+                firstSide * firstSide) / (2 * secondSide * thirdSide)));
+        double secondSideAngle = Math.toDegrees(Math.acos((firstSide * firstSide + thirdSide * thirdSide -
+                secondSide * secondSide) / (2 * firstSide * thirdSide)));
+        double thirdSideAngle = 180 - firstSideAngle - secondSideAngle;
+
+        return String.format("Сторона 1: %.2f мм, Противоположный угол: %.2f градусов%n" +
+                        "Сторона 2: %.2f мм, Противоположный угол: %.2f градусов%n" +
+                        "Сторона 3: %.2f мм, Противоположный угол: %.2f градусов%n",
                 firstSide, firstSideAngle, secondSide, secondSideAngle, thirdSide, thirdSideAngle);
     }
 }
