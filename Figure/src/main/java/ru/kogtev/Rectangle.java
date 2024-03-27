@@ -1,10 +1,8 @@
 package ru.kogtev;
 
-public class Rectangle implements Figure {
+public class Rectangle extends Figure {
     private double length;
     private double width;
-    private double area;
-    private double perimeter;
     private double diagonal;
 
 
@@ -49,5 +47,4 @@ public class Rectangle implements Figure {
         return String.format("Длина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n", diagonal,
                 length, width);
     }
-
 }

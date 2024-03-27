@@ -1,10 +1,14 @@
 package ru.kogtev;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class Printer {
+    private static final Logger logger = LogManager.getLogger(Printer.class);
 
     private String output;
 
@@ -21,7 +25,8 @@ public class Printer {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"))) {
             bufferedWriter.write(output);
         } catch (IOException e) {
-            System.out.println("Ошибка вывода данных");
+            logger.error("Ошибка вывода данных: " + e.getMessage());
+            System.out.println("Ошибка вывода данных: " + e.getMessage());
         }
     }
 }

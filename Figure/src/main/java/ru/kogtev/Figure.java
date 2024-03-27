@@ -1,11 +1,14 @@
 package ru.kogtev;
 
-public interface Figure {
-    String getName();
+public abstract class Figure {
+    protected double area;
+    protected double perimeter;
 
-    double getArea();
+    public abstract String getName();
 
-    double getPerimeter();
+    public abstract double getArea();
 
-    String getInfo();
+    public abstract double getPerimeter();
+
+    public abstract String getInfo();
 }

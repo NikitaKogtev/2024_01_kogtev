@@ -3,7 +3,6 @@ package ru.kogtev;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class FigureReader {
     public static Figure figureReaderFromFile(String inputFilename) throws IOException {

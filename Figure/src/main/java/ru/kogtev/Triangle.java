@@ -1,12 +1,10 @@
 package ru.kogtev;
 
-public class Triangle implements Figure {
+public class Triangle extends Figure {
     private double firstSide;
     private double secondSide;
     private double thirdSide;
     private double halfMeter;
-    private double area;
-    private double perimeter;
     private double firstSideAngle;
     private double secondSideAngle;
     private double thirdSideAngle;
