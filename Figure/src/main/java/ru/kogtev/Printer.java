@@ -6,35 +6,22 @@ import java.io.IOException;
 
 public class Printer {
 
-    //для того чтобы убрать дублирование в переменной output
-//    private Figure figure;
-//
-//    public Printer(Figure figure) {
-//        this.figure = figure;
-//    }
+    private String output;
 
-    public static void printFigureInConsole(Figure figure) {
-        String output = "Тип фигуры: " + figure.getName() + "\n" +
-                "Площадь: " + figure.getArea() + " кв. мм\n" +
-                "Периметр: " + figure.getPerimeter() + " мм\n" +
-                figure.getInfo();
-
-        System.out.println(output);
-
+    public Printer(Figure figure) {
+        output = String.format("Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%n%s",
+                figure.getName(), figure.getArea(), figure.getPerimeter(), figure.getInfo());
     }
 
-    public static void printFigureInFile(Figure figure) {
+    public void printFigureInConsole() {
+        System.out.println(output);
+    }
 
-        String outputFileName = "output.txt";
-        String output = "Тип фигуры: " + figure.getName() + "\n" +
-                "Площадь: " + figure.getArea() + " кв. мм\n" +
-                "Периметр: " + figure.getPerimeter() + " мм\n" +
-                figure.getInfo();
-
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outputFileName))) {
+    public void printFigureInFile() {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"))) {
             bufferedWriter.write(output);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Ошибка вывода данных");
         }
     }
 }
