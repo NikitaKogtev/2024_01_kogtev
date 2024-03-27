@@ -3,11 +3,18 @@ package ru.kogtev;
 public class Rectangle implements Figure {
     private double length;
     private double width;
+    private double area;
+    private double perimeter;
+    private double diagonal;
 
 
     public Rectangle(double length, double width) {
-        this.length = length;
-        this.width = width;
+        this.length = Math.max(length, width);
+        this.width = Math.min(length, width);
+
+        diagonal = Math.sqrt(length * length + width * width);
+        area = length * width;
+        perimeter = 2 * (length + width);
     }
 
     @Override
@@ -15,21 +22,32 @@ public class Rectangle implements Figure {
         return "Прямоугольник";
     }
 
+    public double getLength() {
+        return length;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public double getDiagonal() {
+        return diagonal;
+    }
+
     @Override
     public double getArea() {
-        return length * width;
+        return area;
     }
 
     @Override
     public double getPerimeter() {
-        return 2 * (length + width);
+        return perimeter;
     }
 
     @Override
     public String getInfo() {
-        double diagonal = Math.sqrt(length * length + width * width);
-
         return String.format("Длина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n", diagonal,
-                Math.max(length, width), Math.min(length, width));
+                length, width);
     }
+
 }

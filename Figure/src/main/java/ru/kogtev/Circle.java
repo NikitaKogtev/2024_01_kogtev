@@ -2,9 +2,17 @@ package ru.kogtev;
 
 public class Circle implements Figure {
     private double radius;
+    private double diameter;
+    private double area;
+    private double perimeter;
+
 
     public Circle(double radius) {
         this.radius = radius;
+
+        diameter = 2 * radius;
+        area = Math.PI * radius * radius;
+        perimeter = 2 * Math.PI * radius;
     }
 
     @Override
@@ -12,20 +20,28 @@ public class Circle implements Figure {
         return "Круг";
     }
 
+    public double getRadius() {
+        return radius;
+    }
+
+    public double getDiameter() {
+        return diameter;
+    }
+
     @Override
     public double getArea() {
-        return Math.PI * radius * radius;
+        return area;
     }
 
     @Override
     public double getPerimeter() {
-        return 2 * Math.PI * radius;
+        return perimeter;
     }
 
     @Override
     public String getInfo() {
-        double diameter = 2 * radius;
-
         return String.format("Радиус: %.2f мм%nДиаметр: %.2f мм%n", radius, diameter);
     }
+
+
 }
