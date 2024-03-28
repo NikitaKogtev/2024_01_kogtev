@@ -10,6 +10,8 @@ public class Circle extends Figure {
         diameter = 2 * radius;
         area = Math.PI * radius * radius;
         perimeter = 2 * Math.PI * radius;
+
+        logger.info(getName() + " был создан успешно");
     }
 
     @Override

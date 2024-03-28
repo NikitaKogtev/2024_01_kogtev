@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="DEBUG">
+<Configuration status="WARN">
 
     <Appenders>
         <Console name="LogToConsole" target="SYSTEM_OUT">
@@ -8,12 +8,7 @@
     </Appenders>
 
     <Loggers>
-
-        <Logger name="ru.kogtev" level="debug" additivity="false">
-            <AppenderRef ref="LogToConsole"/>
-        </Logger>
-
-        <Root level="error">
+        <Root level="INFO">
             <AppenderRef ref="LogToConsole"/>
         </Root>
     </Loggers>

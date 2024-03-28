@@ -19,14 +19,16 @@ public class Printer {
 
     public void printFigureInConsole() {
         System.out.println(output);
+        logger.info("Фигура успешно выведена в консоль");
     }
 
     public void printFigureInFile() {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"))) {
+        String fileName = "output.txt";
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName))) {
             bufferedWriter.write(output);
+            logger.info("Фигура успешно записана в файл: " + fileName);
         } catch (IOException e) {
             logger.error("Ошибка вывода данных: " + e.getMessage());
-            System.out.println("Ошибка вывода данных: " + e.getMessage());
         }
     }
 }

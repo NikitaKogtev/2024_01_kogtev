@@ -8,8 +8,18 @@ public class Triangle extends Figure {
     private double firstSideAngle;
     private double secondSideAngle;
     private double thirdSideAngle;
+    private boolean isValidTriangle;
 
     public Triangle(double firstSide, double secondSide, double thirdSide) {
+
+        isValidTriangle = (firstSide + secondSide > thirdSide) && (firstSide + thirdSide > secondSide)
+                && (secondSide + thirdSide > firstSide);
+
+        if (!isValidTriangle) {
+            logger.error("Невозможно создать треугольник с заданными сторонами");
+            System.exit(2);
+        }
+
         this.firstSide = firstSide;
         this.secondSide = secondSide;
         this.thirdSide = thirdSide;
@@ -17,11 +27,14 @@ public class Triangle extends Figure {
         halfMeter = (firstSide + secondSide + thirdSide) / 2;
         area = Math.sqrt(halfMeter * (halfMeter - firstSide) * (halfMeter - secondSide) * (halfMeter - thirdSide));
         perimeter = firstSide + secondSide + thirdSide;
+
         firstSideAngle = Math.toDegrees(Math.acos((secondSide * secondSide + thirdSide * thirdSide -
                 firstSide * firstSide) / (2 * secondSide * thirdSide)));
         secondSideAngle = Math.toDegrees(Math.acos((firstSide * firstSide + thirdSide * thirdSide -
                 secondSide * secondSide) / (2 * firstSide * thirdSide)));
         thirdSideAngle = 180 - firstSideAngle - secondSideAngle;
+
+        logger.info(getName() + " был создан успешно");
     }
 
     @Override

@@ -1,9 +1,9 @@
 package ru.kogtev;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
+import java.io.IOException;
 
 public class Main {
 
@@ -14,8 +14,8 @@ public class Main {
         logger.info("Начало работы приложения");
 
         if (args.length > 2) {
-            logger.error("Аргументы введены неверно, используйте форму: java Main <input_file> <output_file/console>");
-            throw new ArrayIndexOutOfBoundsException("Аргументы введены неверно, используйте форму: java Main <input_file> <output_file/console>");
+            logger.error("Аргументы указаны неверно. Должны быть указаны <input_file> file/console>");
+            System.exit(2);
         }
 
         String inputFilename = args[0];
@@ -27,7 +27,8 @@ public class Main {
 
             if (outputParameter.equals("console")) {
                 printer.printFigureInConsole();
-            } else {
+            }
+            if (outputParameter.equals("file")) {
                 printer.printFigureInFile();
             }
 

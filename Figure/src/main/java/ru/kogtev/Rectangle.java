@@ -13,10 +13,15 @@ public class Rectangle extends Figure {
         diagonal = Math.sqrt(length * length + width * width);
         area = length * width;
         perimeter = 2 * (length + width);
+
+        logger.info(getName() + " был создан успешно");
     }
 
     @Override
     public String getName() {
+        if (length == width) {
+            return "Квадрат";
+        }
         return "Прямоугольник";
     }
 
@@ -44,7 +49,6 @@ public class Rectangle extends Figure {
 
     @Override
     public String getInfo() {
-        return String.format("Длина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n", diagonal,
-                length, width);
+        return String.format("Длина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n", diagonal, length, width);
     }
 }

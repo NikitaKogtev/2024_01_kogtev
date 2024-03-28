@@ -16,7 +16,7 @@ public class FigureCreator {
                 return new Triangle(params[0], params[1], params[2]);
             default:
                 logger.error("Неверный тип фигуры: " + typeReader);
-                throw new IllegalArgumentException("Неверный тип фигуры: " + typeReader);
+                throw new IllegalArgumentException();
         }
     }
 }
