@@ -1,21 +1,18 @@
 package ru.kogtev;
 
 public class Triangle extends Figure {
-    private double firstSide;
-    private double secondSide;
-    private double thirdSide;
-    private double halfMeter;
-    private double firstSideAngle;
-    private double secondSideAngle;
-    private double thirdSideAngle;
-    private boolean isValidTriangle;
+    private final double firstSide;
+    private final double secondSide;
+    private final double thirdSide;
+    private final double halfMeter;
+    private final double firstSideAngle;
+    private final double secondSideAngle;
+    private final double thirdSideAngle;
 
     public Triangle(double firstSide, double secondSide, double thirdSide) {
 
-        isValidTriangle = (firstSide + secondSide > thirdSide) && (firstSide + thirdSide > secondSide)
-                && (secondSide + thirdSide > firstSide);
-
-        if (!isValidTriangle) {
+        if (!((firstSide + secondSide > thirdSide) && (firstSide + thirdSide > secondSide)
+                && (secondSide + thirdSide > firstSide))) {
             logger.error("Невозможно создать треугольник с заданными сторонами");
             System.exit(2);
         }
@@ -79,9 +76,11 @@ public class Triangle extends Figure {
 
     @Override
     public String getInfo() {
-        return String.format("Сторона 1: %.2f мм, Противоположный угол: %.2f градусов%n" +
+        return String.format(
+                        "Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%n" +
+                        "Сторона 1: %.2f мм, Противоположный угол: %.2f градусов%n" +
                         "Сторона 2: %.2f мм, Противоположный угол: %.2f градусов%n" +
                         "Сторона 3: %.2f мм, Противоположный угол: %.2f градусов%n",
-                firstSide, firstSideAngle, secondSide, secondSideAngle, thirdSide, thirdSideAngle);
+                getName(), area, perimeter, firstSide, firstSideAngle, secondSide, secondSideAngle, thirdSide, thirdSideAngle);
     }
 }

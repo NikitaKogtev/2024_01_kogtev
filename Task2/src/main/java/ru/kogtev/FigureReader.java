@@ -8,23 +8,28 @@ import java.io.FileReader;
 import java.io.IOException;
 
 
-public class FigureReader {
+public final class FigureReader {
     private static final Logger logger = LogManager.getLogger(FigureReader.class);
+    private static final String SPLITTER = " ";
+
+    private FigureReader() {
+
+    }
 
     public static Figure figureReaderFromFile(String inputFilename) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFilename))) {
 
-            String typeReader = bufferedReader.readLine();
-            String[] paramsStr = bufferedReader.readLine().split(" ");
+            String figureType = bufferedReader.readLine();
+            String[] paramsStr = bufferedReader.readLine().split(SPLITTER);
             double[] params = new double[paramsStr.length];
 
             for (int i = 0; i < paramsStr.length; i++) {
                 params[i] = Double.parseDouble(paramsStr[i]);
             }
 
-            logger.info("×òåíèÿ ôèãóðû èç ôàéëà âûïîëíåíî óñïåøíî");
+            logger.info("Ð§Ñ‚ÐµÐ½Ð¸Ðµ Ñ„Ð¸Ð³ÑƒÑ€Ñ‹ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð° Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¾ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾");
 
-            return FigureCreator.createFigure(typeReader, params);
+            return FigureCreator.createFigure(figureType, params);
         }
     }
 }

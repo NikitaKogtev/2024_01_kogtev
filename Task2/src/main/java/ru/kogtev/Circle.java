@@ -1,10 +1,16 @@
 package ru.kogtev;
 
 public class Circle extends Figure {
-    private double radius;
-    private double diameter;
+    private final double radius;
+    private final double diameter;
 
     public Circle(double radius) {
+
+        if (radius < 0) {
+            logger.error("Переданные значение меньше нуля, невозможно создать круг с заданными параметрами");
+            System.exit(2);
+        }
+
         this.radius = radius;
 
         diameter = 2 * radius;
@@ -39,6 +45,7 @@ public class Circle extends Figure {
 
     @Override
     public String getInfo() {
-        return String.format("Радиус: %.2f мм%nДиаметр: %.2f мм%n", radius, diameter);
+        return String.format("Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%nРадиус: %.2f мм%nДиаметр: %.2f мм%n",
+                getName(), area, perimeter, radius, diameter);
     }
 }

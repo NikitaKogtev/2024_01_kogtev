@@ -1,12 +1,17 @@
 package ru.kogtev;
 
 public class Rectangle extends Figure {
-    private double length;
-    private double width;
-    private double diagonal;
+    private final double length;
+    private final double width;
+    private final double diagonal;
 
 
     public Rectangle(double length, double width) {
+        if (length < 0 || width < 0) {
+            logger.error("Переданные значение меньше нуля, невозможно создать {} с заданными параметрами", getName().toLowerCase());
+            System.exit(2);
+        }
+
         this.length = Math.max(length, width);
         this.width = Math.min(length, width);
 
@@ -14,7 +19,7 @@ public class Rectangle extends Figure {
         area = length * width;
         perimeter = 2 * (length + width);
 
-        logger.info(getName() + " был создан успешно");
+        logger.info("{} был создан успешно", getName());
     }
 
     @Override
@@ -47,8 +52,10 @@ public class Rectangle extends Figure {
         return perimeter;
     }
 
+
     @Override
     public String getInfo() {
-        return String.format("Длина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n", diagonal, length, width);
+        return String.format("Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%nДлина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n",
+                getName(), area, perimeter, diagonal, length, width);
     }
 }

@@ -23,19 +23,20 @@ public class Main {
 
         try {
             Figure figure = FigureReader.figureReaderFromFile(inputFilename);
-            Printer printer = new Printer(figure);
 
-            if (outputParameter.equals("console")) {
-                printer.printFigureInConsole();
-            }
-            if (outputParameter.equals("file")) {
-                printer.printFigureInFile();
+            if (outputParameter.equals(OutputType.CONSOLE.outputType)) {
+                Printer.printFigureInConsole(figure);
+            } else if (outputParameter.equals(OutputType.FILE.outputType)) {
+                Printer.printFigureInFile(figure);
+            } else {
+                logger.error("Передан некорректный вывод файлов");
+                System.exit(2);
             }
 
         } catch (IOException e) {
-            logger.error("Ошибка чтения файла: " + e.getMessage());
+            logger.error("Ошибка чтения файла: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            logger.error("Данные введены некорректно: " + e.getMessage());
+            logger.error("Данные введены некорректно: {} ", e.getMessage());
         }
 
         logger.info("Конец работы приложения");
