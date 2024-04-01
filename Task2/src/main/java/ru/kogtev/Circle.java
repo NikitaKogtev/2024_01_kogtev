@@ -34,18 +34,7 @@ public class Circle extends Figure {
     }
 
     @Override
-    public double getArea() {
-        return area;
-    }
-
-    @Override
-    public double getPerimeter() {
-        return perimeter;
-    }
-
-    @Override
     public String getInfo() {
-        return String.format("Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%nРадиус: %.2f мм%nДиаметр: %.2f мм%n",
-                getName(), area, perimeter, radius, diameter);
+        return super.getInfo() + String.format("Радиус: %.2f мм%nДиаметр: %.2f мм%n", radius, diameter);
     }
 }

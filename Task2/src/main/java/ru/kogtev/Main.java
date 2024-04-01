@@ -21,12 +21,14 @@ public class Main {
         String inputFilename = args[0];
         String outputParameter = args[1];
 
+        OutputMethod outputMethod = OutputMethod.valueOf(outputParameter.toUpperCase());
+
         try {
             Figure figure = FigureReader.figureReaderFromFile(inputFilename);
 
-            if (outputParameter.equals(OutputType.CONSOLE.outputType)) {
+            if (outputMethod == OutputMethod.CONSOLE) {
                 Printer.printFigureInConsole(figure);
-            } else if (outputParameter.equals(OutputType.FILE.outputType)) {
+            } else if (outputMethod == OutputMethod.FILE) {
                 Printer.printFigureInFile(figure);
             } else {
                 logger.error("Передан некорректный вывод файлов");

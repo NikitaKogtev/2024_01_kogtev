@@ -4,7 +4,6 @@ public class Triangle extends Figure {
     private final double firstSide;
     private final double secondSide;
     private final double thirdSide;
-    private final double halfMeter;
     private final double firstSideAngle;
     private final double secondSideAngle;
     private final double thirdSideAngle;
@@ -21,7 +20,7 @@ public class Triangle extends Figure {
         this.secondSide = secondSide;
         this.thirdSide = thirdSide;
 
-        halfMeter = (firstSide + secondSide + thirdSide) / 2;
+        double halfMeter = (firstSide + secondSide + thirdSide) / 2;
         area = Math.sqrt(halfMeter * (halfMeter - firstSide) * (halfMeter - secondSide) * (halfMeter - thirdSide));
         perimeter = firstSide + secondSide + thirdSide;
 
@@ -64,23 +63,11 @@ public class Triangle extends Figure {
     }
 
     @Override
-    public double getArea() {
-        return area;
-    }
-
-    @Override
-    public double getPerimeter() {
-        return perimeter;
-
-    }
-
-    @Override
     public String getInfo() {
-        return String.format(
-                        "Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%n" +
-                        "Сторона 1: %.2f мм, Противоположный угол: %.2f градусов%n" +
+        return super.getInfo() + String.format(
+                "Сторона 1: %.2f мм, Противоположный угол: %.2f градусов%n" +
                         "Сторона 2: %.2f мм, Противоположный угол: %.2f градусов%n" +
                         "Сторона 3: %.2f мм, Противоположный угол: %.2f градусов%n",
-                getName(), area, perimeter, firstSide, firstSideAngle, secondSide, secondSideAngle, thirdSide, thirdSideAngle);
+                firstSide, firstSideAngle, secondSide, secondSideAngle, thirdSide, thirdSideAngle);
     }
 }

@@ -43,19 +43,8 @@ public class Rectangle extends Figure {
     }
 
     @Override
-    public double getArea() {
-        return area;
-    }
-
-    @Override
-    public double getPerimeter() {
-        return perimeter;
-    }
-
-
-    @Override
     public String getInfo() {
-        return String.format("Тип фигуры: %s%nПлощадь: %.2f кв. мм%nПериметр: %.2f мм%nДлина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n",
-                getName(), area, perimeter, diagonal, length, width);
+        return super.getInfo() + String.format("Длина диагонали: %.2f мм%nДлина: %.2f мм%nШирина: %.2f мм%n"
+                , diagonal, length, width);
     }
 }
