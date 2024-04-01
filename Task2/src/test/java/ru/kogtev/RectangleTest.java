@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RectangleTest {
+class RectangleTest {
 
     @Test
     void testRectangle() {
