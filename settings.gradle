@@ -1,3 +1,4 @@
 rootProject.name = '2024_01_kogtev'
 
-include 'MultiplicationTable'
+include 'Task1'
+include 'Task2'
