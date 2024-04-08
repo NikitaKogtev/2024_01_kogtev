@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class LoseWindow extends JDialog {
+
+
     private ActionListener newGameListener;
     private ActionListener exitListener;
 
@@ -24,7 +26,6 @@ public class LoseWindow extends JDialog {
         setResizable(false);
         pack();
         setLocationRelativeTo(null);
-        setVisible(true);
     }
 
     public void setNewGameListener(ActionListener newGameListener) {
@@ -33,6 +34,14 @@ public class LoseWindow extends JDialog {
 
     public void setExitListener(ActionListener exitListener) {
         this.exitListener = exitListener;
+    }
+
+    public ActionListener getNewGameListener() {
+        return newGameListener;
+    }
+
+    public ActionListener getExitListener() {
+        return exitListener;
     }
 
     private JLabel createLoseLabel(GridBagLayout layout) {

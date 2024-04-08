@@ -1,5 +1,7 @@
 package ru.kogtev.app;
 
+import ru.kogtev.controller.MinesweeperController;
+import ru.kogtev.models.MinesweeperModel;
 import ru.kogtev.view.*;
 
 public class Application {
@@ -8,11 +10,17 @@ public class Application {
         SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
         HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
 
-        mainWindow.setNewGameMenuAction(e -> { /* TODO */ });
+
+        MinesweeperModel model = new MinesweeperModel(10, 10, 10);
+        MinesweeperController controller = new MinesweeperController(model, mainWindow);
+
+
+        mainWindow.setNewGameMenuAction(e -> controller.controllerStartNewGame());
+
         mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
         mainWindow.setHighScoresMenuAction(e -> highScoresWindow.setVisible(true));
         mainWindow.setExitMenuAction(e -> mainWindow.dispose());
-        mainWindow.setCellListener((x, y, buttonType) -> { /* TODO */ });
+        mainWindow.setCellListener(controller::handleCellClick);
 
         mainWindow.createGameField(10, 10);
         mainWindow.setVisible(true);
@@ -20,7 +28,7 @@ public class Application {
         // TODO: There is a sample code below, remove it after try
 
         mainWindow.setTimerValue(145);
-        mainWindow.setBombsCount(45);
+
         mainWindow.setCellImage(0, 0, GameImage.EMPTY);
         mainWindow.setCellImage(0, 1, GameImage.CLOSED);
         mainWindow.setCellImage(0, 2, GameImage.MARKED);
