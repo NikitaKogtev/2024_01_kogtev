@@ -108,6 +108,7 @@ public class MainWindow extends JFrame {
 
                 cellButtons[y][x] = new JButton(GameImage.CLOSED.getImageIcon());
                 cellButtons[y][x].addMouseListener(new MouseAdapter() {
+
                     @Override
                     public void mouseReleased(MouseEvent e) {
                         if (listener == null) {
@@ -118,10 +119,10 @@ public class MainWindow extends JFrame {
                             case MouseEvent.BUTTON1:
                                 listener.onMouseClick(x, y, ButtonType.LEFT_BUTTON);
                                 break;
-                            case MouseEvent.BUTTON2:
+                            case MouseEvent.BUTTON3:
                                 listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
                                 break;
-                            case MouseEvent.BUTTON3:
+                            case MouseEvent.BUTTON2:
                                 listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
                                 break;
                             default:
