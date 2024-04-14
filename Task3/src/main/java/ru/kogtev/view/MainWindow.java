@@ -71,7 +71,7 @@ public class MainWindow extends JFrame {
     }
 
     public void setCellImage(int x, int y, GameImage gameImage) {
-        cellButtons[y][x].setIcon(gameImage.getImageIcon());
+        cellButtons[x][y].setIcon(gameImage.getImageIcon());
     }
 
     public void setBombsCount(int bombsCount) {
@@ -103,12 +103,11 @@ public class MainWindow extends JFrame {
 
         for (int row = 0; row < numberOfRows; row++) {
             for (int col = 0; col < numberOfCols; col++) {
-                final int x = col;
-                final int y = row;
+                final int x = row;
+                final int y = col;
 
-                cellButtons[y][x] = new JButton(GameImage.CLOSED.getImageIcon());
-                cellButtons[y][x].addMouseListener(new MouseAdapter() {
-
+                cellButtons[x][y] = new JButton(GameImage.CLOSED.getImageIcon());
+                cellButtons[x][y].addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseReleased(MouseEvent e) {
                         if (listener == null) {
@@ -119,10 +118,10 @@ public class MainWindow extends JFrame {
                             case MouseEvent.BUTTON1:
                                 listener.onMouseClick(x, y, ButtonType.LEFT_BUTTON);
                                 break;
-                            case MouseEvent.BUTTON3:
+                            case MouseEvent.BUTTON2:
                                 listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
                                 break;
-                            case MouseEvent.BUTTON2:
+                            case MouseEvent.BUTTON3:
                                 listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
                                 break;
                             default:
@@ -130,7 +129,7 @@ public class MainWindow extends JFrame {
                         }
                     }
                 });
-                buttonsPanel.add(cellButtons[y][x]);
+                buttonsPanel.add(cellButtons[x][y]);
             }
         }
 
