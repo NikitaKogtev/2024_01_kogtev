@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame{
     private final Container contentPane;
     private final GridBagLayout mainLayout;
 
@@ -118,10 +118,10 @@ public class MainWindow extends JFrame {
                             case MouseEvent.BUTTON1:
                                 listener.onMouseClick(x, y, ButtonType.LEFT_BUTTON);
                                 break;
-                            case MouseEvent.BUTTON2:
+                            case MouseEvent.BUTTON3:
                                 listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
                                 break;
-                            case MouseEvent.BUTTON3:
+                            case MouseEvent.BUTTON2:
                                 listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
                                 break;
                             default:
@@ -192,4 +192,6 @@ public class MainWindow extends JFrame {
         mainLayout.setConstraints(label, gbc);
         contentPane.add(label);
     }
+
+
 }

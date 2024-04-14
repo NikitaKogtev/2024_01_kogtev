@@ -1,60 +1,73 @@
 package ru.kogtev.controller;
 
 import ru.kogtev.models.GameModel;
+import ru.kogtev.models.HighScore;
+import ru.kogtev.models.TimerListener;
 import ru.kogtev.view.*;
 
-public class MinesweeperController {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class MinesweeperController implements TimerListener {
     private MainWindow view;
     private GameModel gameModel;
+    private HighScoresWindow highScoresWindow;
 
 
-    public MinesweeperController(GameModel gameModel, MainWindow view) {
+    public MinesweeperController(GameModel gameModel, MainWindow view, HighScoresWindow highScoresWindow) {
         this.gameModel = gameModel;
         this.view = view;
+        this.highScoresWindow = highScoresWindow;
+        updateHighScore();
     }
 
-    public void updateModelForGameType(GameType gameType) {
-        switch (gameType) {
-            case NOVICE:
-                gameModel = new GameModel(GameType.NOVICE);
-                break;
-            case MEDIUM:
-                gameModel = new GameModel(GameType.MEDIUM);
-                break;
-            case EXPERT:
-                gameModel = new GameModel(GameType.EXPERT);
-                break;
-        }
-        view.createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
-        controllerStartNewGame();
+    private void updateHighScore() {
+        Map<GameType, HighScore> highScoreMap = gameModel.getHighScore();
+        highScoresWindow.setNoviceRecord(highScoreMap.get(GameType.NOVICE).getName(),
+                highScoreMap.get(GameType.NOVICE).getScore());
+        highScoresWindow.setMediumRecord(highScoreMap.get(GameType.MEDIUM).getName(),
+                highScoreMap.get(GameType.MEDIUM).getScore());
+        highScoresWindow.setExpertRecord(highScoreMap.get(GameType.EXPERT).getName(),
+                highScoreMap.get(GameType.EXPERT).getScore());
     }
+
 
     public void controllerStartNewGame() {
         gameModel.start();
+        gameModel.addTimerListener(this);
         updateView();
         view.setBombsCount(gameModel.getBoardModel().getTotalMines());
     }
 
-    public void handleCellClick(int row, int col, ButtonType buttonType) {
+    public void handleCellClick(int row, int col, ButtonType buttonType) throws IOException {
 
         switch (buttonType) {
             case LEFT_BUTTON:
                 gameModel.openCell(row, col);
                 updateView();
                 if (gameModel.isGameOver()) {
+                    gameModel.stopTimer();
                     gameModel.openAllMines();
                     updateView();
-
                     LoseWindow loseWindow = new LoseWindow(view);
                     loseWindow.setNewGameListener(e -> controllerStartNewGame());
                     loseWindow.setExitListener(e -> view.dispose());
                     loseWindow.setVisible(true);
                 } else if (gameModel.isGameWon()) {
+                    gameModel.stopTimer();
+                    if (gameModel.checkRecord()) {
+                        RecordsWindow recordsWindow = new RecordsWindow(view);
+                        recordsWindow.setNameListener(name -> updateName(name));
+                        recordsWindow.setVisible(true);
+                        updateHighScore();
+                        gameModel.saveHighScore();
+                    }
                     WinWindow winWindow = new WinWindow(view);
                     winWindow.setNewGameListener(e -> controllerStartNewGame());
                     winWindow.setExitListener(e -> view.dispose());
                     winWindow.setVisible(true);
-
                 }
                 break;
             case RIGHT_BUTTON:
@@ -117,5 +130,18 @@ public class MinesweeperController {
         }
     }
 
+    public void updateModelForGameType(GameType gameType) {
+        gameModel = new GameModel(gameType);
+        view.createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
+        controllerStartNewGame();
+    }
 
+    @Override
+    public void onTimerTick(int elapsedTime) {
+        view.setTimerValue(elapsedTime);
+    }
+
+    public void updateName(String name) {
+        gameModel.getHighScore().get(gameModel.getGameType()).setName(name);
+    }
 }

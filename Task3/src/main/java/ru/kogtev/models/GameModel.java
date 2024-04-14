@@ -2,7 +2,8 @@ package ru.kogtev.models;
 
 import ru.kogtev.view.GameType;
 
-import java.util.Timer;
+import java.io.*;
+import java.util.*;
 
 public class GameModel {
     private final int NOVICE_ROWS_AMOUNT = 10;
@@ -16,6 +17,9 @@ public class GameModel {
     private final int EXPERT_MINES_AMOUNT = 99;
     private final int DELAY = 1000;
     private final int PERIOD = 1000;
+
+    private final String FILENAME = "highscore.txt";
+
     private int score;
 
     private BoardModel boardModel;
@@ -23,8 +27,14 @@ public class GameModel {
     private GameType gameType;
 
     private boolean firstClick;
+
     private Timer timer;
+    private List<TimerListener> listeners = new ArrayList<>();
     private int elapsedTimer;
+
+
+    Map<GameType, HighScore> highScore;
+
     private int remainingMines; // количество оставшихся мин
 
     private boolean gameOver;  // флаг, указывающий на завершение игры
@@ -33,10 +43,26 @@ public class GameModel {
     public GameModel(GameType gameType) {
         this.gameType = gameType;
         boardModel = gameDifficultyChoose();
+        initializeHighScore();
+    }
+
+    private void initializeHighScore() {
+        try {
+            highScore = readHighScore();
+        } catch (IOException | ClassNotFoundException e) {
+            highScore = new HashMap<>();
+            highScore.put(GameType.NOVICE, new HighScore(GameType.NOVICE, "Unknown", 9999));
+            highScore.put(GameType.MEDIUM, new HighScore(GameType.MEDIUM, "Unknown", 9999));
+            highScore.put(GameType.EXPERT, new HighScore(GameType.EXPERT, "Unknown", 9999));
+        }
     }
 
 
     public void start() {
+        stopTimer();
+        elapsedTimer = 0;
+        notifyListeners();
+        listeners = new ArrayList<>();
         boardModel = gameDifficultyChoose();
         gameWon = false;
         gameOver = false;
@@ -63,6 +89,7 @@ public class GameModel {
     public void openCell(int row, int col) {
         if (firstClick) {
             boardModel.generateCellValueOnBoard(row, col);
+            startTimer();
             firstClick = false;
         }
 
@@ -112,7 +139,9 @@ public class GameModel {
     }
 
     public void toggleFlag(int row, int col) {
-        if (remainingMines == 0 && !boardModel.getFlaggedCellValue(row, col)) {
+
+        if (remainingMines == 0 && !boardModel.getFlaggedCellValue(row, col)
+                || boardModel.getOpenedCellValue(row, col)) {
             return;
         }
 
@@ -188,6 +217,54 @@ public class GameModel {
         }
     }
 
+    private void startTimer() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                elapsedTimer++;
+                notifyListeners();
+            }
+        }, DELAY, PERIOD);
+    }
+
+    private void notifyListeners() {
+        for (TimerListener listener : listeners) {
+            listener.onTimerTick(elapsedTimer);
+        }
+    }
+
+    public void stopTimer() {
+        if (timer != null) {
+            score = elapsedTimer;
+            timer.cancel();
+        }
+    }
+
+    public void saveHighScore() throws IOException {
+        FileOutputStream fos = new FileOutputStream(FILENAME);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(highScore);
+        oos.flush();
+        oos.close();
+    }
+
+    public Map<GameType, HighScore> readHighScore() throws IOException, ClassNotFoundException {
+        FileInputStream fos = new FileInputStream(FILENAME);
+        ObjectInputStream oos = new ObjectInputStream(fos);
+
+        Map<GameType, HighScore> highScore = (Map<GameType, HighScore>) oos.readObject();
+        oos.close();
+        return highScore;
+    }
+
+    public boolean checkRecord() {
+        if (score < highScore.get(gameType).getScore()) {
+            highScore.get(gameType).setScore(score);
+            return true;
+        }
+        return false;
+    }
 
     public int getRemainingMines() {
         return remainingMines;
@@ -197,7 +274,8 @@ public class GameModel {
         return boardModel;
     }
 
-    public void addTimerListener() {
+    public void addTimerListener(TimerListener listener) {
+        listeners.add(listener);
     }
 
     public boolean isGameOver() {
@@ -208,19 +286,11 @@ public class GameModel {
         return gameWon;
     }
 
+    public Map<GameType, HighScore> getHighScore() {
+        return highScore;
+    }
 
-    //    private void startTimer() {
-//        timer.scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                elapsedTimer++;
-//                view.setTimerValue(get);
-//            }
-//        }, 1000, 1000);
-//    }
-//
-//    private void stopTimer() {
-//        score = elapsedTimer;
-//        timer.cancel();
-//    }
+    public GameType getGameType() {
+        return gameType;
+    }
 }

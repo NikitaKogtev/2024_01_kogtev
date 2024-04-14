@@ -2,52 +2,54 @@ package ru.kogtev.app;
 
 import ru.kogtev.controller.MinesweeperController;
 import ru.kogtev.models.GameModel;
+import ru.kogtev.models.HighScore;
 import ru.kogtev.view.*;
+
+import java.io.IOException;
+import java.util.List;
 
 
 public class Application {
     public static void main(String[] args) {
         MainWindow mainWindow = new MainWindow();
         SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
+        HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
+
+        RecordsWindow recordsWindow = new RecordsWindow(mainWindow);
 
         GameModel gameModel = new GameModel(GameType.NOVICE);
 
-        MinesweeperController controller = new MinesweeperController(gameModel, mainWindow);
+        MinesweeperController controller = new MinesweeperController(gameModel, mainWindow, highScoresWindow);
 
         mainWindow.createGameField(10, 10);
 
         controller.controllerStartNewGame();
 
-        mainWindow.setCellListener((x, y, buttonType) -> controller.handleCellClick(x, y, buttonType));
+        mainWindow.setCellListener((x, y, buttonType) -> {
+            try {
+                controller.handleCellClick(x, y, buttonType);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         mainWindow.setVisible(true);
+
+        recordsWindow.setNameListener(name -> controller.updateName(name));
 
         mainWindow.setNewGameMenuAction(e -> controller.controllerStartNewGame());
 
         settingsWindow.setGameTypeListener((gameType) -> controller.updateModelForGameType(gameType));
 
         mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
-//
-//      HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
-//
+
+        mainWindow.setHighScoresMenuAction(e -> highScoresWindow.setVisible(true));
+
+        recordsWindow.setNameListener(name -> controller.updateName(name));
+
+        mainWindow.setExitMenuAction(e -> mainWindow.dispose());
 
 
-//
-
-//        settingsWindow.setGameTypeListener(gameType -> {
-//                    controller.updateModelForGameType(gameType);
-//                    controller.controllerStartNewGame();
-//                }
-//        );
-//
-//        mainWindow.setHighScoresMenuAction(e -> highScoresWindow.setVisible(true));
-//
-//        mainWindow.setExitMenuAction(e -> mainWindow.dispose());
-//
-//        mainWindow.setCellListener(controller::handleCellClick);
-////
-////        mainWindow.createGameField(10, 10);
-////        mainWindow.setVisible(true);
 ////
 ////        // TODO: There is a sample code below, remove it after try
 ////
