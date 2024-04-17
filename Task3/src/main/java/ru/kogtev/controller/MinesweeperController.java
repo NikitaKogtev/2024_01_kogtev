@@ -1,13 +1,10 @@
 package ru.kogtev.controller;
 
-import ru.kogtev.models.GameModel;
-import ru.kogtev.models.HighScore;
-import ru.kogtev.models.TimerListener;
+import ru.kogtev.models.*;
 import ru.kogtev.view.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Time;
 import java.util.Map;
 
 public class MinesweeperController implements TimerListener {
@@ -36,7 +33,7 @@ public class MinesweeperController implements TimerListener {
 
     public void controllerStartNewGame() {
         gameModel.start();
-        gameModel.addTimerListener(this);
+        TimerManager.addTimerListener(this);
         updateView();
         view.setBombsCount(gameModel.getBoardModel().getTotalMines());
     }
@@ -48,7 +45,7 @@ public class MinesweeperController implements TimerListener {
                 gameModel.openCell(row, col);
                 updateView();
                 if (gameModel.isGameOver()) {
-                    gameModel.stopTimer();
+                    TimerManager.stopTimer();
                     gameModel.openAllMines();
                     updateView();
                     LoseWindow loseWindow = new LoseWindow(view);
@@ -56,13 +53,14 @@ public class MinesweeperController implements TimerListener {
                     loseWindow.setExitListener(e -> view.dispose());
                     loseWindow.setVisible(true);
                 } else if (gameModel.isGameWon()) {
-                    gameModel.stopTimer();
+
+                    TimerManager.stopTimer();
                     if (gameModel.checkRecord()) {
                         RecordsWindow recordsWindow = new RecordsWindow(view);
-                        recordsWindow.setNameListener(name -> updateName(name));
+                        recordsWindow.setNameListener(this::updateName);
                         recordsWindow.setVisible(true);
                         updateHighScore();
-                        gameModel.saveHighScore();
+                        HighScoreManager.saveHighScore(gameModel.getHighScore());
                     }
                     WinWindow winWindow = new WinWindow(view);
                     winWindow.setNewGameListener(e -> controllerStartNewGame());
