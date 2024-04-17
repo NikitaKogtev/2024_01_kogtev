@@ -5,9 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 
-public class MainWindow extends JFrame{
+public class MainWindow extends JFrame {
     private final Container contentPane;
     private final GridBagLayout mainLayout;
 

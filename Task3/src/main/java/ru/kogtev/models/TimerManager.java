@@ -11,7 +11,7 @@ public class TimerManager {
 
     private static Timer timer;
 
-    static List<TimerListener> listeners = new ArrayList<>();
+    static List<TimerListener> timerListeners = new ArrayList<>();
     static int elapsedTimer = 0;
     static int score;
 
@@ -30,14 +30,14 @@ public class TimerManager {
         }, DELAY, PERIOD);
     }
 
-    static void notifyListeners() {
-        for (TimerListener listener : listeners) {
-            listener.onTimerTick(elapsedTimer);
+    public static void notifyListeners() {
+        for (TimerListener timerListener : timerListeners) {
+            timerListener.onTimerTick(elapsedTimer);
         }
     }
 
-    public static void addTimerListener(TimerListener listener) {
-        listeners.add(listener);
+    public static void addTimerListener(TimerListener timerListener) {
+        timerListeners.add(timerListener);
     }
 
     public static void stopTimer() {

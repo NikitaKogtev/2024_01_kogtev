@@ -3,18 +3,16 @@ package ru.kogtev.models;
 import java.util.Random;
 
 public class BoardModel {
-    private int rows;
-    private int cols;
+    private final int rows;
+    private final int cols;
 
-    private int totalMines;
+    private final int totalMines;
 
-    private int[][] board; // массив для хранения информации о клетках (0 - пустая клетка, 1-8 - количество мин вокруг, -1 - мина)
-    private boolean[][] opened; // массив для отслеживания открытых клеток false закрыта true открыта
-    private boolean[][] flagged; // массив для отслеживания установленных флажков
+    private final int[][] board; // массив для хранения информации о клетках (0 - пустая клетка, 1-8 - количество мин вокруг, -1 - мина)
+    private final boolean[][] opened; // массив для отслеживания открытых клеток false закрыта true открыта
+    private final boolean[][] flagged; // массив для отслеживания установленных флажков
 
-    private Random random = new Random();
-
-    private boolean firstClick = true;
+    private final Random random = new Random();
 
     public BoardModel(int rows, int cols, int totalMines) {
         this.rows = rows;
@@ -24,28 +22,24 @@ public class BoardModel {
         board = new int[rows][cols];
         opened = new boolean[rows][cols];
         flagged = new boolean[rows][cols];
-
     }
 
 
-    public void generateCellValueOnBoard(int row, int col) {
-
-        placeMinesRandomly(row, col);
-
+    public void generateCellValueOnBoard(int row, int col, boolean firstClick) {
+        placeMinesRandomly(row, col, firstClick);
         calculateValueCellWithoutMines();
-        // Вычисление чисел для ячеек без мин
-
     }
 
-    private void placeMinesRandomly(int row, int col) {
+    private void placeMinesRandomly(int row, int col, boolean firstClick) {
         int minesPlaced = 0;
+        int x;
+        int y;
 
         while (minesPlaced < totalMines) {
 
-            int x = this.random.nextInt(rows);
-            int y = this.random.nextInt(cols);
+            x = this.random.nextInt(rows);
+            y = this.random.nextInt(cols);
 
-            // Если первый клик, то игнорируем клетку первого клика
             if (firstClick && (Math.abs(x - row) <= 1 && Math.abs(y - col) <= 1)) {
                 continue;
             }
@@ -65,6 +59,7 @@ public class BoardModel {
                     int count = countMinesAroundCell(row, col);
                     board[row][col] = count;
                 }
+
             }
         }
     }
@@ -98,9 +93,6 @@ public class BoardModel {
         return board[row][col];
     }
 
-    public void setBoardCellValue(int row, int col, int value) {
-        board[row][col] = value;
-    }
 
     public boolean getOpenedCellValue(int row, int col) {
         return opened[row][col];

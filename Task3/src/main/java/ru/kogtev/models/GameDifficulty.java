@@ -13,7 +13,6 @@ public class GameDifficulty {
     private static final int EXPERT_COLS_AMOUNT = 30;
     private static final int EXPERT_MINES_AMOUNT = 99;
 
-
     private GameDifficulty() {
 
     }

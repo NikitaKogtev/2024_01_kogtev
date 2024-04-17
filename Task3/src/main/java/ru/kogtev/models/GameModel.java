@@ -2,18 +2,20 @@ package ru.kogtev.models;
 
 import ru.kogtev.view.GameType;
 
-import java.io.*;
 import java.util.*;
 
 public class GameModel {
-    private BoardModel boardModel;
     private final GameType gameType;
-    private int remainingMines;
+    private BoardModel boardModel;
+
     private boolean firstClick;
+
+    private int remainingMines;
+
     private boolean gameOver;
     private boolean gameWon;
 
-    private Map<GameType, HighScore> highScore;
+    private final Map<GameType, HighScore> highScore;
 
     public GameModel(GameType gameType) {
         this.gameType = gameType;
@@ -22,10 +24,7 @@ public class GameModel {
     }
 
     public void start() {
-        TimerManager.stopTimer();
-        TimerManager.elapsedTimer = 0;
-        TimerManager.notifyListeners();
-        TimerManager.listeners = new ArrayList<>();
+        timerUpdater();
 
         boardModel = GameDifficulty.gameDifficultyChoose(gameType);
         gameWon = false;
@@ -34,19 +33,24 @@ public class GameModel {
         remainingMines = boardModel.getTotalMines();
     }
 
+    private static void timerUpdater() {
+        TimerManager.stopTimer();
+        TimerManager.elapsedTimer = 0;
+        TimerManager.notifyListeners();
+        TimerManager.timerListeners = new ArrayList<>();
+    }
+
     public void openCell(int row, int col) {
         if (firstClick) {
-            boardModel.generateCellValueOnBoard(row, col);
+            boardModel.generateCellValueOnBoard(row, col, true);
             TimerManager.startTimer();
             firstClick = false;
         }
 
-        // Если ячейка уже открыта или поставлен флаг то return
         if (getBoardModel().getOpenedCellValue(row, col) || getBoardModel().getFlaggedCellValue(row, col)) {
             return;
         }
 
-        // Меняем ячейку с закрытой на открытую
         boardModel.setOpenedCellValue(row, col, true);
 
         if (boardModel.getBoardCellValue(row, col) == -1) {
@@ -58,7 +62,15 @@ public class GameModel {
         }
 
         checkGameWon();
+    }
 
+    private boolean isValidCell(int row, int col) {
+        return row >= 0 && row < boardModel.getRows() && col >= 0 && col < boardModel.getCols();
+    }
+
+    private boolean isValidCellNotOpenedAndFlag(int nRow, int nCol) {
+        return isValidCell(nRow, nCol) && !boardModel.getOpenedCellValue(nRow, nCol) &&
+                !boardModel.getFlaggedCellValue(nRow, nCol);
     }
 
     private void openAdjacentCells(int row, int col) {
@@ -68,8 +80,7 @@ public class GameModel {
                 int nRow = row + dRow;
                 int nCol = col + dCol;
 
-                if (isValidCell(nRow, nCol) && !boardModel.getOpenedCellValue(nRow, nCol) &&
-                        !boardModel.getFlaggedCellValue(nRow, nCol)) {
+                if (isValidCellNotOpenedAndFlag(nRow, nCol)) {
 
                     boardModel.setOpenedCellValue(nRow, nCol, true);
 
@@ -81,13 +92,7 @@ public class GameModel {
         }
     }
 
-
-    private boolean isValidCell(int row, int col) {
-        return row >= 0 && row < boardModel.getRows() && col >= 0 && col < boardModel.getCols();
-    }
-
     public void toggleFlag(int row, int col) {
-
         if (remainingMines == 0 && !boardModel.getFlaggedCellValue(row, col)
                 || boardModel.getOpenedCellValue(row, col)) {
             return;
@@ -103,7 +108,6 @@ public class GameModel {
     }
 
     public void openSurroundingCellsIfFlagged(int row, int col) {
-        // Проверяем, что координаты клетки валидны и клетка открыта
         if (!isValidCell(row, col) || !boardModel.getOpenedCellValue(row, col)
                 || boardModel.getBoardCellValue(row, col) == 0) {
             return;
@@ -111,18 +115,16 @@ public class GameModel {
 
         int flagsAround = countFlagsAround(row, col);
 
-        // Проверяем, что количество флажков вокруг равно значению в текущей клетке
         if (flagsAround == boardModel.getBoardCellValue(row, col)) {
-            // Открываем все закрытые клетки вокруг текущей
             for (int dRow = -1; dRow <= 1; dRow++) {
                 for (int dCol = -1; dCol <= 1; dCol++) {
                     int nRow = row + dRow;
                     int nCol = col + dCol;
-                    // Проверяем, что новые координаты являются валидными ячейками и клетка закрыта
-                    if (isValidCell(nRow, nCol) && !boardModel.getOpenedCellValue(nRow, nCol) && //duplicate
-                            !boardModel.getFlaggedCellValue(nRow, nCol)) {
+
+                    if (isValidCellNotOpenedAndFlag(nRow, nCol)) {
                         openCell(nRow, nCol);
                     }
+
                 }
             }
         }
@@ -130,15 +132,16 @@ public class GameModel {
 
     private int countFlagsAround(int row, int col) {
         int count = 0;
-        // Проверяем количество флажков вокруг клетки
+
         for (int dRow = -1; dRow <= 1; dRow++) {
             for (int dCol = -1; dCol <= 1; dCol++) {
                 int nRow = row + dRow;
                 int nCol = col + dCol;
-                // Проверяем, что новые координаты являются валидными ячейками и там установлен флажок
+
                 if (isValidCell(nRow, nCol) && boardModel.getFlaggedCellValue(nRow, nCol)) {
                     count++;
                 }
+
             }
         }
         return count;
@@ -147,9 +150,11 @@ public class GameModel {
     private void checkGameWon() {
         for (int row = 0; row < boardModel.getRows(); row++) {
             for (int col = 0; col < boardModel.getCols(); col++) {
+
                 if (boardModel.getBoardCellValue(row, col) != -1 && !boardModel.getOpenedCellValue(row, col)) {
-                    return; // Если есть не пройденная ячейка без мин, игра не выиграна
+                    return;
                 }
+
             }
         }
         gameWon = true;
@@ -158,9 +163,11 @@ public class GameModel {
     public void openAllMines() {
         for (int row = 0; row < boardModel.getRows(); row++) {
             for (int col = 0; col < boardModel.getCols(); col++) {
+
                 if (boardModel.getBoardCellValue(row, col) == -1) {
                     boardModel.setOpenedCellValue(row, col, true);
                 }
+
             }
         }
     }
@@ -173,6 +180,7 @@ public class GameModel {
         }
         return false;
     }
+
 
     public int getRemainingMines() {
         return remainingMines;

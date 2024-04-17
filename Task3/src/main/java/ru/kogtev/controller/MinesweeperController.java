@@ -4,19 +4,19 @@ import ru.kogtev.models.*;
 import ru.kogtev.view.*;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.Map;
 
 public class MinesweeperController implements TimerListener {
-    private MainWindow view;
+    private final MainWindow view;
     private GameModel gameModel;
-    private HighScoresWindow highScoresWindow;
+    private final HighScoresWindow highScoresWindow;
 
 
     public MinesweeperController(GameModel gameModel, MainWindow view, HighScoresWindow highScoresWindow) {
         this.gameModel = gameModel;
         this.view = view;
         this.highScoresWindow = highScoresWindow;
+
         updateHighScore();
     }
 
@@ -28,8 +28,14 @@ public class MinesweeperController implements TimerListener {
                 highScoreMap.get(GameType.MEDIUM).getScore());
         highScoresWindow.setExpertRecord(highScoreMap.get(GameType.EXPERT).getName(),
                 highScoreMap.get(GameType.EXPERT).getScore());
-    }
 
+        try {
+            HighScoreManager.saveHighScore(gameModel.getHighScore());
+        } catch (IOException e) {
+            System.out.println("Ќевозможно записать файл " + e.getMessage());
+        }
+
+    }
 
     public void controllerStartNewGame() {
         gameModel.start();
@@ -38,35 +44,10 @@ public class MinesweeperController implements TimerListener {
         view.setBombsCount(gameModel.getBoardModel().getTotalMines());
     }
 
-    public void handleCellClick(int row, int col, ButtonType buttonType) throws IOException {
-
+    public void handleCellClick(int row, int col, ButtonType buttonType) {
         switch (buttonType) {
             case LEFT_BUTTON:
-                gameModel.openCell(row, col);
-                updateView();
-                if (gameModel.isGameOver()) {
-                    TimerManager.stopTimer();
-                    gameModel.openAllMines();
-                    updateView();
-                    LoseWindow loseWindow = new LoseWindow(view);
-                    loseWindow.setNewGameListener(e -> controllerStartNewGame());
-                    loseWindow.setExitListener(e -> view.dispose());
-                    loseWindow.setVisible(true);
-                } else if (gameModel.isGameWon()) {
-
-                    TimerManager.stopTimer();
-                    if (gameModel.checkRecord()) {
-                        RecordsWindow recordsWindow = new RecordsWindow(view);
-                        recordsWindow.setNameListener(this::updateName);
-                        recordsWindow.setVisible(true);
-                        updateHighScore();
-                        HighScoreManager.saveHighScore(gameModel.getHighScore());
-                    }
-                    WinWindow winWindow = new WinWindow(view);
-                    winWindow.setNewGameListener(e -> controllerStartNewGame());
-                    winWindow.setExitListener(e -> view.dispose());
-                    winWindow.setVisible(true);
-                }
+                handleLeftButtonClick(row, col);
                 break;
             case RIGHT_BUTTON:
                 gameModel.toggleFlag(row, col);
@@ -78,6 +59,52 @@ public class MinesweeperController implements TimerListener {
         }
         updateView();
     }
+
+    private void handleLeftButtonClick(int row, int col) {
+        gameModel.openCell(row, col);
+        if (gameModel.isGameOver()) {
+            handleGameOver();
+        } else if (gameModel.isGameWon()) {
+            handleGameWon();
+        }
+    }
+
+    private void handleGameOver() {
+        TimerManager.stopTimer();
+        gameModel.openAllMines();
+        updateView();
+        showLoseWindow();
+    }
+
+    private void handleGameWon() {
+        TimerManager.stopTimer();
+        if (gameModel.checkRecord()) {
+            showRecordsWindow();
+            updateHighScore();
+        }
+        showWinWindow();
+    }
+
+    private void showLoseWindow() {
+        LoseWindow loseWindow = new LoseWindow(view);
+        loseWindow.setNewGameListener(e -> controllerStartNewGame());
+        loseWindow.setExitListener(e -> view.dispose());
+        loseWindow.setVisible(true);
+    }
+
+    private void showWinWindow() {
+        WinWindow winWindow = new WinWindow(view);
+        winWindow.setNewGameListener(e -> controllerStartNewGame());
+        winWindow.setExitListener(e -> view.dispose());
+        winWindow.setVisible(true);
+    }
+
+    private void showRecordsWindow() {
+        RecordsWindow recordsWindow = new RecordsWindow(view);
+        recordsWindow.setNameListener(this::updateName);
+        recordsWindow.setVisible(true);
+    }
+
 
     private void updateView() {
         int rows = gameModel.getBoardModel().getRows();
@@ -95,32 +122,32 @@ public class MinesweeperController implements TimerListener {
 
         if (!gameModel.getBoardModel().getOpenedCellValue(row, col)) {
             if (gameModel.getBoardModel().getFlaggedCellValue(row, col)) {
-                return GameImage.MARKED; // флаг
+                return GameImage.MARKED;
             } else {
-                return GameImage.CLOSED; // закрыта€ €чейка
+                return GameImage.CLOSED;
             }
         } else {
             switch (gameModel.getBoardModel().getBoardCellValue(row, col)) {
                 case -1:
-                    return GameImage.BOMB; // минированна€ €чейка
+                    return GameImage.BOMB;
                 case 0:
-                    return GameImage.EMPTY; // пуста€ €чейка
+                    return GameImage.EMPTY;
                 case 1:
-                    return GameImage.NUM_1; // €чейка с числом 1
+                    return GameImage.NUM_1;
                 case 2:
-                    return GameImage.NUM_2; // €чейка с числом 2
+                    return GameImage.NUM_2;
                 case 3:
-                    return GameImage.NUM_3; // €чейка с числом 3
+                    return GameImage.NUM_3;
                 case 4:
-                    return GameImage.NUM_4; // €чейка с числом 4
+                    return GameImage.NUM_4;
                 case 5:
-                    return GameImage.NUM_5; // €чейка с числом 5
+                    return GameImage.NUM_5;
                 case 6:
-                    return GameImage.NUM_6; // €чейка с числом 6
+                    return GameImage.NUM_6;
                 case 7:
-                    return GameImage.NUM_7; // €чейка с числом 7
+                    return GameImage.NUM_7;
                 case 8:
-                    return GameImage.NUM_8; // €чейка с числом 8
+                    return GameImage.NUM_8;
                 default:
                     throw new IllegalArgumentException("Invalid cell value: " +
                             gameModel.getBoardModel().getBoardCellValue(row, col));

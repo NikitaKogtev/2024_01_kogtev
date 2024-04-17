@@ -20,9 +20,9 @@ public class HighScoreManager {
             return readHighScore();
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
             Map<GameType, HighScore> highScore = new EnumMap<>(GameType.class);
-            highScore.put(GameType.NOVICE, new HighScore(GameType.NOVICE, DEFAULT_PLAYER_NAME, SCORE));
-            highScore.put(GameType.MEDIUM, new HighScore(GameType.MEDIUM, DEFAULT_PLAYER_NAME, SCORE));
-            highScore.put(GameType.EXPERT, new HighScore(GameType.EXPERT, DEFAULT_PLAYER_NAME, SCORE));
+            highScore.put(GameType.NOVICE, new HighScore(DEFAULT_PLAYER_NAME, SCORE));
+            highScore.put(GameType.MEDIUM, new HighScore(DEFAULT_PLAYER_NAME, SCORE));
+            highScore.put(GameType.EXPERT, new HighScore(DEFAULT_PLAYER_NAME, SCORE));
             return highScore;
         }
     }
