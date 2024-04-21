@@ -14,6 +14,7 @@ public class Storage {
 
     public Storage(int storageSize) {
         this.storageSize = storageSize;
+        logger.info("Создан склад, который вмещает в себя {} ресурсов", storageSize);
     }
 
     public synchronized void addResources(Resource resource) throws InterruptedException {
