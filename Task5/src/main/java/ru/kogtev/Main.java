@@ -16,12 +16,11 @@ public class Main {
     private static final String PRODUCER_TIME = "producerTime";
     private static final String CONSUMER_TIME = "consumerTime";
     private static final String STORAGE_SIZE = "storageSize";
+    private static final String PROPERTIES_FILE = "config.properties";
 
 
     public static void main(String[] args) {
-
-
-        try (FileInputStream fileInputStream = new FileInputStream("config.properties")) {
+        try (FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE)) {
             Properties properties = new Properties();
             properties.load(fileInputStream);
 
@@ -49,10 +48,8 @@ public class Main {
             logger.error("Не найден конфигурационный файл {}", e.getMessage());
             System.exit(2);
         } catch (IOException e) {
-            logger.error("Не верный конфигурационный файл {}", e.getMessage());
+            logger.error("Параметры конфигурационного файла не верны {}", e.getMessage());
             System.exit(2);
         }
-
-
     }
 }

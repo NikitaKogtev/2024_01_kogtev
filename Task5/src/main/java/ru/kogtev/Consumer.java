@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Logger;
 public class Consumer implements Runnable {
     private static final Logger logger = LogManager.getLogger(Consumer.class);
 
-    private int id;
-    private int consumerTime;
-    private Storage storage;
+    private final int id;
+    private final int consumerTime;
+    private final Storage storage;
 
     public Consumer(int id, int consumerTime, Storage storage) {
         this.id = id;
@@ -16,18 +16,16 @@ public class Consumer implements Runnable {
         this.storage = storage;
     }
 
-
     @Override
     public void run() {
         while (true) {
             try {
                 Resource resource = storage.takeResources();
                 Thread.sleep(consumerTime);
-                logger.info("Получен ресурс c id - {} Consumer - {}", resource.getId(), id);
+                logger.info("Потребитель - {} забрал ресурс - {} со склада", id, resource.getId());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-
         }
     }
 }

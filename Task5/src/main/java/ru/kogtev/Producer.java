@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Logger;
 public class Producer implements Runnable {
     private static final Logger logger = LogManager.getLogger(Producer.class);
 
-    private int id;
-    private int producerTime;
-    private Storage storage;
+    private final int id;
+    private final int producerTime;
+    private final Storage storage;
 
     public Producer(int id, int producerTime, Storage storage) {
         this.id = id;
@@ -23,7 +23,7 @@ public class Producer implements Runnable {
                 Thread.sleep(producerTime);
                 Resource resource = new Resource();
                 storage.addResources(resource);
-                logger.info("Добавляет ресурс {} Producer c id - {}", resource.getId(), id);
+                logger.info("Производитель - {} доставил ресурс - {} на склад", id, resource.getId());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
