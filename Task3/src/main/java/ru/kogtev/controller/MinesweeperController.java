@@ -36,11 +36,10 @@ public class MinesweeperController implements TimerListener {
         }
 
     }
-
+    //TODO: Настроить листенер во вью на таймер и на счетчик бомб
     public void controllerStartNewGame() {
         gameModel.start();
         TimerManager.addTimerListener(this);
-        updateView();
         view.setBombsCount(gameModel.getBoardModel().getTotalMines());
     }
 
@@ -57,7 +56,6 @@ public class MinesweeperController implements TimerListener {
                 gameModel.openSurroundingCellsIfFlagged(row, col);
                 break;
         }
-        updateView();
     }
 
     private void handleLeftButtonClick(int row, int col) {
@@ -72,7 +70,6 @@ public class MinesweeperController implements TimerListener {
     private void handleGameOver() {
         TimerManager.stopTimer();
         gameModel.openAllMines();
-        updateView();
         showLoseWindow();
     }
 
@@ -85,74 +82,10 @@ public class MinesweeperController implements TimerListener {
         showWinWindow();
     }
 
-    private void showLoseWindow() {
-        LoseWindow loseWindow = new LoseWindow(view);
-        loseWindow.setNewGameListener(e -> controllerStartNewGame());
-        loseWindow.setExitListener(e -> view.dispose());
-        loseWindow.setVisible(true);
-    }
-
-    private void showWinWindow() {
-        WinWindow winWindow = new WinWindow(view);
-        winWindow.setNewGameListener(e -> controllerStartNewGame());
-        winWindow.setExitListener(e -> view.dispose());
-        winWindow.setVisible(true);
-    }
-
     private void showRecordsWindow() {
         RecordsWindow recordsWindow = new RecordsWindow(view);
         recordsWindow.setNameListener(this::updateName);
         recordsWindow.setVisible(true);
-    }
-
-
-    private void updateView() {
-        int rows = gameModel.getBoardModel().getRows();
-        int cols = gameModel.getBoardModel().getCols();
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                view.setCellImage(row, col, getCellImage(row, col));
-            }
-        }
-    }
-
-
-    public GameImage getCellImage(int row, int col) {
-
-        if (!gameModel.getBoardModel().getOpenedCellValue(row, col)) {
-            if (gameModel.getBoardModel().getFlaggedCellValue(row, col)) {
-                return GameImage.MARKED;
-            } else {
-                return GameImage.CLOSED;
-            }
-        } else {
-            switch (gameModel.getBoardModel().getBoardCellValue(row, col)) {
-                case -1:
-                    return GameImage.BOMB;
-                case 0:
-                    return GameImage.EMPTY;
-                case 1:
-                    return GameImage.NUM_1;
-                case 2:
-                    return GameImage.NUM_2;
-                case 3:
-                    return GameImage.NUM_3;
-                case 4:
-                    return GameImage.NUM_4;
-                case 5:
-                    return GameImage.NUM_5;
-                case 6:
-                    return GameImage.NUM_6;
-                case 7:
-                    return GameImage.NUM_7;
-                case 8:
-                    return GameImage.NUM_8;
-                default:
-                    throw new IllegalArgumentException("Invalid cell value: " +
-                            gameModel.getBoardModel().getBoardCellValue(row, col));
-            }
-        }
     }
 
     public void updateModelForGameType(GameType gameType) {

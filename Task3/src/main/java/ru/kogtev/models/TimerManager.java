@@ -30,14 +30,14 @@ public class TimerManager {
         }, DELAY, PERIOD);
     }
 
+    public static void addTimerListener(TimerListener timerListener) {
+        timerListeners.add(timerListener);
+    }
+
     public static void notifyListeners() {
         for (TimerListener timerListener : timerListeners) {
             timerListener.onTimerTick(elapsedTimer);
         }
-    }
-
-    public static void addTimerListener(TimerListener timerListener) {
-        timerListeners.add(timerListener);
     }
 
     public static void stopTimer() {

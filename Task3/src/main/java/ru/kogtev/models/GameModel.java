@@ -12,8 +12,12 @@ public class GameModel {
 
     private int remainingMines;
 
+    private List<GameStateListener> gameStateListeners = new ArrayList<>();
     private boolean gameOver;
     private boolean gameWon;
+
+
+
 
     private final Map<GameType, HighScore> highScore;
 
@@ -47,7 +51,7 @@ public class GameModel {
             firstClick = false;
         }
 
-        if (getBoardModel().getOpenedCellValue(row, col) || getBoardModel().getFlaggedCellValue(row, col)) {
+        if (getBoardModel().isCellOpened(row, col) || getBoardModel().getFlaggedCellValue(row, col)) {
             return;
         }
 
@@ -55,6 +59,7 @@ public class GameModel {
 
         if (boardModel.getBoardCellValue(row, col) == -1) {
             gameOver = true;
+            notifyGameLost();
         }
 
         if (boardModel.getBoardCellValue(row, col) == 0) {
@@ -69,7 +74,7 @@ public class GameModel {
     }
 
     private boolean isValidCellNotOpenedAndFlag(int nRow, int nCol) {
-        return isValidCell(nRow, nCol) && !boardModel.getOpenedCellValue(nRow, nCol) &&
+        return isValidCell(nRow, nCol) && !boardModel.isCellOpened(nRow, nCol) &&
                 !boardModel.getFlaggedCellValue(nRow, nCol);
     }
 
@@ -94,7 +99,7 @@ public class GameModel {
 
     public void toggleFlag(int row, int col) {
         if (remainingMines == 0 && !boardModel.getFlaggedCellValue(row, col)
-                || boardModel.getOpenedCellValue(row, col)) {
+                || boardModel.isCellOpened(row, col)) {
             return;
         }
 
@@ -108,7 +113,7 @@ public class GameModel {
     }
 
     public void openSurroundingCellsIfFlagged(int row, int col) {
-        if (!isValidCell(row, col) || !boardModel.getOpenedCellValue(row, col)
+        if (!isValidCell(row, col) || !boardModel.isCellOpened(row, col)
                 || boardModel.getBoardCellValue(row, col) == 0) {
             return;
         }
@@ -151,13 +156,15 @@ public class GameModel {
         for (int row = 0; row < boardModel.getRows(); row++) {
             for (int col = 0; col < boardModel.getCols(); col++) {
 
-                if (boardModel.getBoardCellValue(row, col) != -1 && !boardModel.getOpenedCellValue(row, col)) {
+                if (boardModel.getBoardCellValue(row, col) != -1 && !boardModel.isCellOpened(row, col)) {
                     return;
                 }
 
             }
         }
         gameWon = true;
+        notifyGameWon();
+
     }
 
     public void openAllMines() {
@@ -204,6 +211,26 @@ public class GameModel {
 
     public GameType getGameType() {
         return gameType;
+    }
+
+    public void addGameStateListener(GameStateListener gameStateListener) {
+        gameStateListeners.add(gameStateListener);
+    }
+
+    public void removeGameStateListener(GameStateListener gameStateListener{
+        gameStateListeners.remove(gameStateListener);
+    }
+
+    private void notifyGameWon() {
+        for (GameStateListener gameStateListener : gameStateListeners ) {
+            gameStateListener.onGameWon();
+        }
+    }
+
+    private void notifyGameLost() {
+        for (GameStateListener gameStateListener : gameStateListeners ) {
+            gameStateListener.onGameLost();
+        }
     }
 
 
