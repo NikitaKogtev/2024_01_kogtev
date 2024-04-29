@@ -1,20 +1,51 @@
 package ru.kogtev.view;
 
-import ru.kogtev.models.Cell;
-import ru.kogtev.models.CellUpdateListener;
-import ru.kogtev.models.GameModel;
-import ru.kogtev.models.GameStateListener;
+import ru.kogtev.controller.GameController;
+import ru.kogtev.models.*;
 
-public class View implements CellUpdateListener, GameStateListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class View implements CellUpdateListener, GameStateListener, TimerListener, BombListener {
     private final GameModel gameModel;
     private MainWindow mainWindow = new MainWindow();
+    private HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
+    private SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
 
-    private WinWindow winWindow = new WinWindow(mainWindow);
+    private final List<CellEventListener> cellEventListeners = new ArrayList<>();
+    private final List<GameStartListener> gameStartListeners = new ArrayList<>();
+    private final List<GameTypeListener> gameTypeListeners = new ArrayList<>();
 
     public View(GameModel gameModel) {
         this.gameModel = gameModel;
+
         gameModel.getBoardModel().addCellUpdateListener(this);
+        gameModel.addBombTickListener(this::onBombTick);
+
+        startNewGame();
+
+    }
+
+    private void startNewGame() {
+        notifyGameStartListener();
+
+        mainWindow.createGameField(10, 10);
+
+        mainWindow.setCellListener(this::notifyCellEventListener);
+
         gameModel.addGameStateListener(this);
+
+        gameModel.addBombTickListener(this::onBombTick);
+
+        mainWindow.setNewGameMenuAction(e -> startNewGame());
+        mainWindow.setBombsCount(gameModel.getRemainingMines());
+
+        mainWindow.setVisible(true);
+        mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
+        settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
+
+        TimerManager.addTimerListener(this);
+
     }
 
     @Override
@@ -44,21 +75,65 @@ public class View implements CellUpdateListener, GameStateListener {
         }
     }
 
+    public MainWindow getMainWindow() {
+        return mainWindow;
+    }
 
     @Override
-    public void onGameWon() {
+    public void onTimerTick(int elapsedTime) {
+        mainWindow.setTimerValue(elapsedTime);
+    }
 
+    @Override
+    public void onBombTick(int remainingMines) {
+        mainWindow.setBombsCount(remainingMines);
+
+    }
+
+    @Override
+    public void onGameWin() {
         WinWindow winWindow = new WinWindow(mainWindow);
-        winWindow.setNewGameListener(e -> gameModel.start());
+        winWindow.setNewGameListener(e -> startNewGame());
         winWindow.setExitListener(e -> mainWindow.dispose());
         winWindow.setVisible(true);
     }
 
     @Override
-    public void onGameLost() {
+    public void onGameLoss() {
         LoseWindow loseWindow = new LoseWindow(mainWindow);
-        loseWindow.setNewGameListener(e -> gameModel.start());
+        loseWindow.setNewGameListener(e -> startNewGame());
         loseWindow.setExitListener(e -> mainWindow.dispose());
         loseWindow.setVisible(true);
     }
+
+    public void addCellEventListener(CellEventListener cellEventListener) {
+        cellEventListeners.add(cellEventListener);
+    }
+
+    private void notifyCellEventListener(int x, int y, ButtonType buttonType) {
+        for (CellEventListener cellEventListener : cellEventListeners) {
+            cellEventListener.onMouseClick(x, y, buttonType);
+        }
+    }
+
+    public void addGameStartListener(GameStartListener gameStartListener) {
+        gameStartListeners.add(gameStartListener);
+    }
+
+    private void notifyGameStartListener() {
+        for (GameStartListener gameStartListener : gameStartListeners) {
+            gameStartListener.onStartGame();
+        }
+    }
+
+    public void addGameTypeListener(GameTypeListener gameTypeListener) {
+        gameTypeListeners.add(gameTypeListener);
+    }
+
+    private void notifyGameTypeListener(GameType gameType) {
+        for (GameTypeListener gameTypeListener : gameTypeListeners) {
+            gameTypeListener.onGameTypeChanged(gameType);
+        }
+    }
+
 }
