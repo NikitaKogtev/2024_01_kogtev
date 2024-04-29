@@ -5,46 +5,60 @@ import ru.kogtev.view.GameType;
 import java.util.*;
 
 public class GameModel {
-    private final GameType gameType;
     private BoardModel boardModel;
 
     private boolean firstClick;
 
+
     private int remainingMines;
 
-    private List<GameStateListener> gameStateListeners = new ArrayList<>();
-    private boolean gameOver;
+    private List<GameStateListener> gameStateListeners;
+    private final List<BombListener> bombListeners;
+
+
+    private boolean gameLost;
     private boolean gameWon;
-
-
-
 
     private final Map<GameType, HighScore> highScore;
 
+
+
     public GameModel(GameType gameType) {
-        this.gameType = gameType;
         boardModel = GameDifficulty.gameDifficultyChoose(gameType);
         highScore = HighScoreManager.initializeHighScore();
+        gameStateListeners = new ArrayList<>();
+        bombListeners = new ArrayList<>();
+        notifyBombTick();
     }
 
     public void start() {
         timerUpdater();
-
-        boardModel = GameDifficulty.gameDifficultyChoose(gameType);
+        boardModel.resetBoard();
+        gameLost = false;
         gameWon = false;
-        gameOver = false;
         firstClick = true;
         remainingMines = boardModel.getTotalMines();
+        notifyBombTick();
+    }
+
+    public void start(GameType gameType) {
+        timerUpdater();
+        boardModel = GameDifficulty.gameDifficultyChoose(gameType);
+        gameLost = false;
+        gameWon = false;
+        firstClick = true;
+        remainingMines = boardModel.getTotalMines();
+        notifyBombTick();
     }
 
     private static void timerUpdater() {
         TimerManager.stopTimer();
         TimerManager.elapsedTimer = 0;
         TimerManager.notifyListeners();
-        TimerManager.timerListeners = new ArrayList<>();
     }
 
     public void openCell(int row, int col) {
+        notifyBombTick();
         if (firstClick) {
             boardModel.generateCellValueOnBoard(row, col, true);
             TimerManager.startTimer();
@@ -58,15 +72,20 @@ public class GameModel {
         boardModel.setOpenedCellValue(row, col, true);
 
         if (boardModel.getBoardCellValue(row, col) == -1) {
-            gameOver = true;
+            gameLost = true;
+            openAllMines();
+            TimerManager.stopTimer();
             notifyGameLost();
+            return;
         }
 
         if (boardModel.getBoardCellValue(row, col) == 0) {
             openAdjacentCells(row, col);
         }
 
-        checkGameWon();
+        if (!gameLost) {
+            checkGameWon();
+        }
     }
 
     private boolean isValidCell(int row, int col) {
@@ -107,8 +126,10 @@ public class GameModel {
 
         if (boardModel.getFlaggedCellValue(row, col)) {
             remainingMines--;
+            notifyBombTick();
         } else {
             remainingMines++;
+            notifyBombTick();
         }
     }
 
@@ -163,8 +184,9 @@ public class GameModel {
             }
         }
         gameWon = true;
+        openAllMines();
+        TimerManager.stopTimer();
         notifyGameWon();
-
     }
 
     public void openAllMines() {
@@ -180,58 +202,60 @@ public class GameModel {
     }
 
 
-    public boolean checkRecord() {
-        if (TimerManager.score < highScore.get(gameType).getScore()) {
-            highScore.get(gameType).setScore(TimerManager.score);
-            return true;
-        }
-        return false;
-    }
+//    public boolean checkRecord() {
+//        if (TimerManager.score < highScore.get(gameType).getScore()) {
+//            highScore.get(gameType).setScore(TimerManager.score);
+//            return true;
+//        }
+//        return false;
+//    }
 
-
-    public int getRemainingMines() {
-        return remainingMines;
-    }
 
     public BoardModel getBoardModel() {
         return boardModel;
     }
 
-    public boolean isGameOver() {
-        return gameOver;
+    public int getRemainingMines() {
+        return remainingMines;
     }
 
-    public boolean isGameWon() {
-        return gameWon;
-    }
 
     public Map<GameType, HighScore> getHighScore() {
         return highScore;
     }
 
-    public GameType getGameType() {
-        return gameType;
+//    public GameType getGameType() {
+//        return gameType;
+//    }
+
+    public void setGameStateListeners(List<GameStateListener> gameStateListeners) {
+        this.gameStateListeners = gameStateListeners;
     }
 
     public void addGameStateListener(GameStateListener gameStateListener) {
         gameStateListeners.add(gameStateListener);
     }
 
-    public void removeGameStateListener(GameStateListener gameStateListener{
-        gameStateListeners.remove(gameStateListener);
-    }
-
     private void notifyGameWon() {
-        for (GameStateListener gameStateListener : gameStateListeners ) {
-            gameStateListener.onGameWon();
+        for (GameStateListener gameStateListener : gameStateListeners) {
+            gameStateListener.onGameWin();
         }
     }
 
     private void notifyGameLost() {
-        for (GameStateListener gameStateListener : gameStateListeners ) {
-            gameStateListener.onGameLost();
+        for (GameStateListener gameStateListener : gameStateListeners) {
+            gameStateListener.onGameLoss();
         }
     }
 
+    public void addBombTickListener(BombListener bombListener) {
+        bombListeners.add(bombListener);
+    }
+
+    private void notifyBombTick() {
+        for (BombListener bombListener: bombListeners) {
+            bombListener.onBombTick(remainingMines);
+        }
+    }
 
 }

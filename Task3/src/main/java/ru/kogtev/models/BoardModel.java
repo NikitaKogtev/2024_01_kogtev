@@ -1,16 +1,18 @@
 package ru.kogtev.models;
 
+import ru.kogtev.view.GameType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class BoardModel {
-    private final int rows;
-    private final int cols;
+    private int rows;
+    private int cols;
 
-    private final int totalMines;
+    private int totalMines;
 
-    private final Cell[][] cells;
+    private Cell[][] cells;
 
     private final List<CellUpdateListener> cellUpdateListeners = new ArrayList<>();
 
@@ -21,6 +23,16 @@ public class BoardModel {
         this.cols = cols;
         this.totalMines = totalMines;
 
+        cells = new Cell[rows][cols];
+        initCells();
+    }
+
+    public void resetBoard() {
+        cells = new Cell[rows][cols];
+        initCells();
+    }
+
+    public void resetBoard(GameType gameType) {
         cells = new Cell[rows][cols];
         initCells();
     }
@@ -126,9 +138,6 @@ public class BoardModel {
         cellUpdateListeners.add(cellUpdateListener);
     }
 
-    public void removeCellUpdateListener(CellUpdateListener cellUpdateListener) {
-        cellUpdateListeners.remove(cellUpdateListener);
-    }
 
     private void notifyCellUpdateListeners(int row, int col, Cell cell) {
         for (CellUpdateListener listener : cellUpdateListeners) {
