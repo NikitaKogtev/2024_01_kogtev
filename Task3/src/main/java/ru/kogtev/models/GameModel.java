@@ -41,16 +41,6 @@ public class GameModel {
         notifyBombTick();
     }
 
-    public void start(GameType gameType) {
-        timerUpdater();
-        boardModel = GameDifficulty.gameDifficultyChoose(gameType);
-        gameLost = false;
-        gameWon = false;
-        firstClick = true;
-        remainingMines = boardModel.getTotalMines();
-        notifyBombTick();
-    }
-
     private static void timerUpdater() {
         TimerManager.stopTimer();
         TimerManager.elapsedTimer = 0;

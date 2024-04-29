@@ -7,44 +7,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class View implements CellUpdateListener, GameStateListener, TimerListener, BombListener {
-    private final GameModel gameModel;
+    private GameModel gameModel;
     private MainWindow mainWindow = new MainWindow();
     private HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
     private SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
 
     private final List<CellEventListener> cellEventListeners = new ArrayList<>();
     private final List<GameStartListener> gameStartListeners = new ArrayList<>();
-    private final List<GameTypeListener> gameTypeListeners = new ArrayList<>();
+    private List<GameTypeListener> gameTypeListeners;
 
     public View(GameModel gameModel) {
         this.gameModel = gameModel;
 
-        gameModel.getBoardModel().addCellUpdateListener(this);
-        gameModel.addBombTickListener(this::onBombTick);
-
         startNewGame();
-
     }
 
     private void startNewGame() {
+        mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
         notifyGameStartListener();
-
-        mainWindow.createGameField(10, 10);
 
         mainWindow.setCellListener(this::notifyCellEventListener);
 
         gameModel.addGameStateListener(this);
 
+        gameModel.getBoardModel().addCellUpdateListener(this);
         gameModel.addBombTickListener(this::onBombTick);
 
+        mainWindow.createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
         mainWindow.setNewGameMenuAction(e -> startNewGame());
         mainWindow.setBombsCount(gameModel.getRemainingMines());
 
         mainWindow.setVisible(true);
-        mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
+        gameTypeListeners = new ArrayList<>();
         settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
 
         TimerManager.addTimerListener(this);
+
+
 
     }
 
@@ -110,6 +109,10 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         cellEventListeners.add(cellEventListener);
     }
 
+    public void removeCellEventListener(CellEventListener cellEventListener) {
+        cellEventListeners.remove(cellEventListener);
+    }
+
     private void notifyCellEventListener(int x, int y, ButtonType buttonType) {
         for (CellEventListener cellEventListener : cellEventListeners) {
             cellEventListener.onMouseClick(x, y, buttonType);
@@ -118,6 +121,10 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
 
     public void addGameStartListener(GameStartListener gameStartListener) {
         gameStartListeners.add(gameStartListener);
+    }
+
+    public void removeGameStartListener(GameStartListener gameStartListener) {
+        gameStartListeners.remove(gameStartListener);
     }
 
     private void notifyGameStartListener() {
@@ -130,10 +137,22 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         gameTypeListeners.add(gameTypeListener);
     }
 
+    public void removeGameTypeListener(GameTypeListener gameTypeListener) {
+        gameTypeListeners.add(gameTypeListener);
+    }
+
+
     private void notifyGameTypeListener(GameType gameType) {
         for (GameTypeListener gameTypeListener : gameTypeListeners) {
             gameTypeListener.onGameTypeChanged(gameType);
         }
+    }
+
+    public void updateEventListeners() {
+
+        cellEventListeners.add(this::notifyCellEventListener);
+        gameStartListeners.add(this::startNewGame);
+        gameTypeListeners.add(this::notifyGameTypeListener);
     }
 
 }

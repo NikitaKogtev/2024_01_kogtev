@@ -7,7 +7,7 @@ import ru.kogtev.view.*;
 import java.util.ArrayList;
 
 public class GameController implements GameStartListener, CellEventListener, GameTypeListener {
-    private final View view;
+    private View view;
     private GameModel gameModel;
 
     public GameController(View view, GameModel gameModel) {
@@ -26,6 +26,7 @@ public class GameController implements GameStartListener, CellEventListener, Gam
         gameModel.setGameStateListeners(new ArrayList<>());
         TimerManager.timerListeners = new ArrayList<>();
         gameModel.start();
+
     }
 
     @Override
@@ -45,7 +46,8 @@ public class GameController implements GameStartListener, CellEventListener, Gam
 
     @Override
     public void onGameTypeChanged(GameType gameType) {
+        gameModel = new GameModel(gameType);
         view.getMainWindow().createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
-        gameModel.start(gameType);
+        onStartGame();
     }
 }

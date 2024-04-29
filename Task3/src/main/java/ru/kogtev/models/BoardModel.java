@@ -32,11 +32,6 @@ public class BoardModel {
         initCells();
     }
 
-    public void resetBoard(GameType gameType) {
-        cells = new Cell[rows][cols];
-        initCells();
-    }
-
     private void initCells() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
