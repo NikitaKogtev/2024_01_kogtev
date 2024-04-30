@@ -3,6 +3,7 @@ package ru.kogtev.models;
 import ru.kogtev.view.GameType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -14,7 +15,7 @@ public class BoardModel {
 
     private Cell[][] cells;
 
-    private final List<CellUpdateListener> cellUpdateListeners = new ArrayList<>();
+    private List<CellUpdateListener> cellUpdateListeners = new ArrayList<>();
 
     private final Random random = new Random();
 
@@ -27,12 +28,7 @@ public class BoardModel {
         initCells();
     }
 
-    public void resetBoard() {
-        cells = new Cell[rows][cols];
-        initCells();
-    }
-
-    private void initCells() {
+    public void initCells() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 cells[i][j] = new Cell();
@@ -104,6 +100,10 @@ public class BoardModel {
         return totalMines;
     }
 
+    public Cell getCell(int row, int col) {
+        return cells[row][col];
+    }
+
     public int getBoardCellValue(int row, int col) {
         return cells[row][col].getBoardValue();
     }
@@ -140,4 +140,15 @@ public class BoardModel {
         }
     }
 
+    @Override
+    public String toString() {
+        return "BoardModel{" +
+                "rows=" + rows +
+                ", cols=" + cols +
+                ", totalMines=" + totalMines +
+                ", cells=" + Arrays.toString(cells) +
+                ", cellUpdateListeners=" + cellUpdateListeners +
+                ", random=" + random +
+                '}';
+    }
 }

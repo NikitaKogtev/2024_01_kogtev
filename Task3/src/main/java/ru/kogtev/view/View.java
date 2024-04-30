@@ -3,8 +3,10 @@ package ru.kogtev.view;
 import ru.kogtev.controller.GameController;
 import ru.kogtev.models.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class View implements CellUpdateListener, GameStateListener, TimerListener, BombListener {
     private GameModel gameModel;
@@ -13,38 +15,43 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
     private SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
 
     private final List<CellEventListener> cellEventListeners = new ArrayList<>();
-    private final List<GameStartListener> gameStartListeners = new ArrayList<>();
-    private List<GameTypeListener> gameTypeListeners;
+    private List<GameStartListener> gameStartListeners = new ArrayList<>();
+    private final List<GameTypeListener> gameTypeListeners = new ArrayList<>();
 
     public View(GameModel gameModel) {
         this.gameModel = gameModel;
 
+        mainWindow.setNewGameMenuAction(e -> startNewGame());
+        mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
+        mainWindow.setHighScoresMenuAction(e -> highScoresWindow.setVisible(true));
+        mainWindow.setExitMenuAction(e -> mainWindow.dispose());
+
+        gameModel.getBoardModel().addCellUpdateListener(this);
+        mainWindow.setCellListener(this::notifyCellEventListener);
+        settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
+
+        updateHighScore();
         startNewGame();
     }
 
     private void startNewGame() {
-        mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
-        notifyGameStartListener();
-
-        mainWindow.setCellListener(this::notifyCellEventListener);
-
-        gameModel.addGameStateListener(this);
+        TimerManager.addTimerListener(this);
 
         gameModel.getBoardModel().addCellUpdateListener(this);
+        mainWindow.setCellListener(this::notifyCellEventListener);
+        gameModel.addGameStateListener(this);
+
+        settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
+
         gameModel.addBombTickListener(this::onBombTick);
 
         mainWindow.createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
-        mainWindow.setNewGameMenuAction(e -> startNewGame());
+
         mainWindow.setBombsCount(gameModel.getRemainingMines());
 
+        System.out.println(this.gameModel.getBoardModel().toString());
         mainWindow.setVisible(true);
-        gameTypeListeners = new ArrayList<>();
-        settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
-
-        TimerManager.addTimerListener(this);
-
-
-
+        notifyGameStartListener();
     }
 
     @Override
@@ -78,6 +85,14 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         return mainWindow;
     }
 
+    public SettingsWindow getSettingsWindow() {
+        return settingsWindow;
+    }
+
+    public void setGameModel(GameModel gameModel) {
+        this.gameModel = gameModel;
+    }
+
     @Override
     public void onTimerTick(int elapsedTime) {
         mainWindow.setTimerValue(elapsedTime);
@@ -91,6 +106,7 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
 
     @Override
     public void onGameWin() {
+        gameModel.setGameStateListeners(new ArrayList<>());
         WinWindow winWindow = new WinWindow(mainWindow);
         winWindow.setNewGameListener(e -> startNewGame());
         winWindow.setExitListener(e -> mainWindow.dispose());
@@ -99,6 +115,7 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
 
     @Override
     public void onGameLoss() {
+        gameModel.setGameStateListeners(new ArrayList<>());
         LoseWindow loseWindow = new LoseWindow(mainWindow);
         loseWindow.setNewGameListener(e -> startNewGame());
         loseWindow.setExitListener(e -> mainWindow.dispose());
@@ -146,13 +163,24 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         for (GameTypeListener gameTypeListener : gameTypeListeners) {
             gameTypeListener.onGameTypeChanged(gameType);
         }
+        startNewGame();
     }
 
-    public void updateEventListeners() {
 
-        cellEventListeners.add(this::notifyCellEventListener);
-        gameStartListeners.add(this::startNewGame);
-        gameTypeListeners.add(this::notifyGameTypeListener);
+    private void updateHighScore() {
+        Map<GameType, HighScore> highScoreMap = gameModel.getHighScore();
+        highScoresWindow.setNoviceRecord(highScoreMap.get(GameType.NOVICE).getName(),
+                highScoreMap.get(GameType.NOVICE).getScore());
+        highScoresWindow.setMediumRecord(highScoreMap.get(GameType.MEDIUM).getName(),
+                highScoreMap.get(GameType.MEDIUM).getScore());
+        highScoresWindow.setExpertRecord(highScoreMap.get(GameType.EXPERT).getName(),
+                highScoreMap.get(GameType.EXPERT).getScore());
+
+        try {
+            HighScoreManager.saveHighScore(gameModel.getHighScore());
+        } catch (IOException e) {
+            System.out.println("Невозможно записать файл " + e.getMessage());
+        }
+
     }
-
 }

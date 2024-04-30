@@ -17,7 +17,7 @@ public class GameDifficulty {
 
     }
 
-    static BoardModel gameDifficultyChoose(GameType gameType) {
+    public static BoardModel gameDifficultyChoose(GameType gameType) {
         switch (gameType) {
             case NOVICE:
                 return new BoardModel(NOVICE_ROWS_AMOUNT, NOVICE_COLS_AMOUNT, NOVICE_MINES_AMOUNT);

@@ -10,6 +10,9 @@ public class SettingsWindow extends JDialog {
     private final ButtonGroup radioGroup = new ButtonGroup();
 
     private GameTypeListener gameTypeListener;
+
+
+
     private GameType gameType;
 
     public SettingsWindow(JFrame owner) {
@@ -34,6 +37,10 @@ public class SettingsWindow extends JDialog {
         setLocationRelativeTo(null);
 
         setGameType(GameType.NOVICE);
+    }
+
+    public GameType getGameType() {
+        return gameType;
     }
 
     public void setGameType(GameType gameType) {

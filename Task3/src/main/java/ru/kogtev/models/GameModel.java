@@ -5,15 +5,17 @@ import ru.kogtev.view.GameType;
 import java.util.*;
 
 public class GameModel {
+
     private BoardModel boardModel;
+    private GameType gameType;
 
     private boolean firstClick;
 
 
     private int remainingMines;
 
-    private List<GameStateListener> gameStateListeners;
-    private final List<BombListener> bombListeners;
+    private List<GameStateListener> gameStateListeners = new ArrayList<>();
+    private List<BombListener> bombListeners = new ArrayList<>();
 
 
     private boolean gameLost;
@@ -24,16 +26,16 @@ public class GameModel {
 
 
     public GameModel(GameType gameType) {
+        this.gameType = gameType;
+
         boardModel = GameDifficulty.gameDifficultyChoose(gameType);
         highScore = HighScoreManager.initializeHighScore();
-        gameStateListeners = new ArrayList<>();
-        bombListeners = new ArrayList<>();
         notifyBombTick();
     }
 
     public void start() {
         timerUpdater();
-        boardModel.resetBoard();
+        boardModel.initCells();
         gameLost = false;
         gameWon = false;
         firstClick = true;
@@ -247,5 +249,10 @@ public class GameModel {
             bombListener.onBombTick(remainingMines);
         }
     }
+
+    public void setBoardModel(BoardModel boardModel) {
+        this.boardModel = boardModel;
+    }
+
 
 }
