@@ -11,7 +11,7 @@ public class TimerManager {
 
     private static Timer timer;
 
-    public static List<TimerListener> timerListeners = new ArrayList<>();
+    public static final List<TimerListener> timerListeners = new ArrayList<>();
     static int elapsedTimer = 0;
     static int score;
 

@@ -5,32 +5,26 @@ import ru.kogtev.view.GameType;
 import java.util.*;
 
 public class GameModel {
-
-    private BoardModel boardModel;
-    private GameType gameType;
+    private final BoardModel boardModel;
+    private final GameType gameType;
 
     private boolean firstClick;
-
-
     private int remainingMines;
-
-    private List<GameStateListener> gameStateListeners = new ArrayList<>();
-    private List<BombListener> bombListeners = new ArrayList<>();
-
 
     private boolean gameLost;
     private boolean gameWon;
 
+    private List<GameStateListener> gameStateListeners = new ArrayList<>();
+    private final List<BombListener> bombListeners = new ArrayList<>();
+
     private final Map<GameType, HighScore> highScore;
-
-
 
     public GameModel(GameType gameType) {
         this.gameType = gameType;
 
         boardModel = GameDifficulty.gameDifficultyChoose(gameType);
         highScore = HighScoreManager.initializeHighScore();
-        notifyBombTick();
+        notifyBombCount();
     }
 
     public void start() {
@@ -40,7 +34,7 @@ public class GameModel {
         gameWon = false;
         firstClick = true;
         remainingMines = boardModel.getTotalMines();
-        notifyBombTick();
+        notifyBombCount();
     }
 
     private static void timerUpdater() {
@@ -50,7 +44,7 @@ public class GameModel {
     }
 
     public void openCell(int row, int col) {
-        notifyBombTick();
+        notifyBombCount();
         if (firstClick) {
             boardModel.generateCellValueOnBoard(row, col, true);
             TimerManager.startTimer();
@@ -75,9 +69,8 @@ public class GameModel {
             openAdjacentCells(row, col);
         }
 
-        if (!gameLost) {
-            checkGameWon();
-        }
+        checkGameWon();
+
     }
 
     private boolean isValidCell(int row, int col) {
@@ -108,7 +101,7 @@ public class GameModel {
         }
     }
 
-    public void toggleFlag(int row, int col) {
+    public void toggleCellFlag(int row, int col) {
         if (remainingMines == 0 && !boardModel.getFlaggedCellValue(row, col)
                 || boardModel.isCellOpened(row, col)) {
             return;
@@ -118,10 +111,10 @@ public class GameModel {
 
         if (boardModel.getFlaggedCellValue(row, col)) {
             remainingMines--;
-            notifyBombTick();
+            notifyBombCount();
         } else {
             remainingMines++;
-            notifyBombTick();
+            notifyBombCount();
         }
     }
 
@@ -193,32 +186,25 @@ public class GameModel {
         }
     }
 
-
-//    public boolean checkRecord() {
-//        if (TimerManager.score < highScore.get(gameType).getScore()) {
-//            highScore.get(gameType).setScore(TimerManager.score);
-//            return true;
-//        }
-//        return false;
-//    }
-
+    public boolean checkRecord() {
+        if (TimerManager.score < highScore.get(gameType).getScore()) {
+            highScore.get(gameType).setScore(TimerManager.score);
+            return true;
+        }
+        return false;
+    }
 
     public BoardModel getBoardModel() {
         return boardModel;
     }
 
-    public int getRemainingMines() {
-        return remainingMines;
-    }
-
-
     public Map<GameType, HighScore> getHighScore() {
         return highScore;
     }
 
-//    public GameType getGameType() {
-//        return gameType;
-//    }
+    public GameType getGameType() {
+        return gameType;
+    }
 
     public void setGameStateListeners(List<GameStateListener> gameStateListeners) {
         this.gameStateListeners = gameStateListeners;
@@ -240,19 +226,13 @@ public class GameModel {
         }
     }
 
-    public void addBombTickListener(BombListener bombListener) {
+    public void addBombCountListener(BombListener bombListener) {
         bombListeners.add(bombListener);
     }
 
-    private void notifyBombTick() {
-        for (BombListener bombListener: bombListeners) {
-            bombListener.onBombTick(remainingMines);
+    private void notifyBombCount() {
+        for (BombListener bombListener : bombListeners) {
+            bombListener.onBombCount(remainingMines);
         }
     }
-
-    public void setBoardModel(BoardModel boardModel) {
-        this.boardModel = boardModel;
-    }
-
-
 }

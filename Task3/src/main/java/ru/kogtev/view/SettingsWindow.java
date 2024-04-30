@@ -39,10 +39,6 @@ public class SettingsWindow extends JDialog {
         setGameType(GameType.NOVICE);
     }
 
-    public GameType getGameType() {
-        return gameType;
-    }
-
     public void setGameType(GameType gameType) {
         JRadioButton radioButton = radioButtonsMap.get(gameType);
 

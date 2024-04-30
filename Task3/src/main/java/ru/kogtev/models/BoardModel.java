@@ -1,21 +1,18 @@
 package ru.kogtev.models;
 
-import ru.kogtev.view.GameType;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public class BoardModel {
-    private int rows;
-    private int cols;
+    private final int rows;
+    private final int cols;
 
-    private int totalMines;
+    private final int totalMines;
 
-    private Cell[][] cells;
+    private final Cell[][] cells;
 
-    private List<CellUpdateListener> cellUpdateListeners = new ArrayList<>();
+    private final List<CellUpdateListener> cellUpdateListeners = new ArrayList<>();
 
     private final Random random = new Random();
 
@@ -100,10 +97,6 @@ public class BoardModel {
         return totalMines;
     }
 
-    public Cell getCell(int row, int col) {
-        return cells[row][col];
-    }
-
     public int getBoardCellValue(int row, int col) {
         return cells[row][col].getBoardValue();
     }
@@ -116,7 +109,6 @@ public class BoardModel {
     public void setOpenedCellValue(int row, int col, boolean value) {
         cells[row][col].setOpened(value);
         notifyCellUpdateListeners(row, col, cells[row][col]);
-        //event запускается здесь, потому что должно меняться непосредственно после обновления ячейки
     }
 
     public boolean getFlaggedCellValue(int row, int col) {
@@ -126,29 +118,15 @@ public class BoardModel {
     public void setFlaggedCellValue(int row, int col, boolean value) {
         cells[row][col].setFlagged(value);
         notifyCellUpdateListeners(row, col, cells[row][col]);
-        //event запускается здесь, потому что должно меняться непосредственно после обновления ячейки
     }
 
     public void addCellUpdateListener(CellUpdateListener cellUpdateListener) {
         cellUpdateListeners.add(cellUpdateListener);
     }
 
-
     private void notifyCellUpdateListeners(int row, int col, Cell cell) {
         for (CellUpdateListener listener : cellUpdateListeners) {
             listener.onCellUpdate(row, col, cell);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "BoardModel{" +
-                "rows=" + rows +
-                ", cols=" + cols +
-                ", totalMines=" + totalMines +
-                ", cells=" + Arrays.toString(cells) +
-                ", cellUpdateListeners=" + cellUpdateListeners +
-                ", random=" + random +
-                '}';
     }
 }

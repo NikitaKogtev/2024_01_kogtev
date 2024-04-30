@@ -1,5 +1,5 @@
 package ru.kogtev.models;
 
 public interface BombListener {
-    void onBombTick(int remainingMines);
+    void onBombCount(int remainingMines);
 }

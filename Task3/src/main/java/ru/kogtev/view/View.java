@@ -1,6 +1,5 @@
 package ru.kogtev.view;
 
-import ru.kogtev.controller.GameController;
 import ru.kogtev.models.*;
 
 import java.io.IOException;
@@ -10,12 +9,12 @@ import java.util.Map;
 
 public class View implements CellUpdateListener, GameStateListener, TimerListener, BombListener {
     private GameModel gameModel;
-    private MainWindow mainWindow = new MainWindow();
-    private HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
-    private SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
+    private final MainWindow mainWindow = new MainWindow();
+    private final HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
+    private final SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
 
     private final List<CellEventListener> cellEventListeners = new ArrayList<>();
-    private List<GameStartListener> gameStartListeners = new ArrayList<>();
+    private final List<GameStartListener> gameStartListeners = new ArrayList<>();
     private final List<GameTypeListener> gameTypeListeners = new ArrayList<>();
 
     public View(GameModel gameModel) {
@@ -30,28 +29,25 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         mainWindow.setCellListener(this::notifyCellEventListener);
         settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
 
+        TimerManager.addTimerListener(this);
+
         updateHighScore();
         startNewGame();
     }
 
     private void startNewGame() {
-        TimerManager.addTimerListener(this);
-
         gameModel.getBoardModel().addCellUpdateListener(this);
         mainWindow.setCellListener(this::notifyCellEventListener);
         gameModel.addGameStateListener(this);
-
         settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
-
-        gameModel.addBombTickListener(this::onBombTick);
+        gameModel.addBombCountListener(this);
 
         mainWindow.createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
-
-        mainWindow.setBombsCount(gameModel.getRemainingMines());
-
-        System.out.println(this.gameModel.getBoardModel().toString());
         mainWindow.setVisible(true);
+
         notifyGameStartListener();
+
+        TimerManager.addTimerListener(this);
     }
 
     @Override
@@ -85,10 +81,6 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         return mainWindow;
     }
 
-    public SettingsWindow getSettingsWindow() {
-        return settingsWindow;
-    }
-
     public void setGameModel(GameModel gameModel) {
         this.gameModel = gameModel;
     }
@@ -99,14 +91,17 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
     }
 
     @Override
-    public void onBombTick(int remainingMines) {
+    public void onBombCount(int remainingMines) {
         mainWindow.setBombsCount(remainingMines);
-
     }
 
     @Override
     public void onGameWin() {
         gameModel.setGameStateListeners(new ArrayList<>());
+        if (gameModel.checkRecord()) {
+            showRecordsWindow();
+            updateHighScore();
+        }
         WinWindow winWindow = new WinWindow(mainWindow);
         winWindow.setNewGameListener(e -> startNewGame());
         winWindow.setExitListener(e -> mainWindow.dispose());
@@ -122,12 +117,19 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         loseWindow.setVisible(true);
     }
 
-    public void addCellEventListener(CellEventListener cellEventListener) {
-        cellEventListeners.add(cellEventListener);
+
+    private void showRecordsWindow() {
+        RecordsWindow recordsWindow = new RecordsWindow(mainWindow);
+        recordsWindow.setNameListener(this::updateName);
+        recordsWindow.setVisible(true);
     }
 
-    public void removeCellEventListener(CellEventListener cellEventListener) {
-        cellEventListeners.remove(cellEventListener);
+    public void updateName(String name) {
+        gameModel.getHighScore().get(gameModel.getGameType()).setName(name);
+    }
+
+    public void addCellEventListener(CellEventListener cellEventListener) {
+        cellEventListeners.add(cellEventListener);
     }
 
     private void notifyCellEventListener(int x, int y, ButtonType buttonType) {
@@ -140,10 +142,6 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         gameStartListeners.add(gameStartListener);
     }
 
-    public void removeGameStartListener(GameStartListener gameStartListener) {
-        gameStartListeners.remove(gameStartListener);
-    }
-
     private void notifyGameStartListener() {
         for (GameStartListener gameStartListener : gameStartListeners) {
             gameStartListener.onStartGame();
@@ -154,18 +152,12 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         gameTypeListeners.add(gameTypeListener);
     }
 
-    public void removeGameTypeListener(GameTypeListener gameTypeListener) {
-        gameTypeListeners.add(gameTypeListener);
-    }
-
-
     private void notifyGameTypeListener(GameType gameType) {
         for (GameTypeListener gameTypeListener : gameTypeListeners) {
             gameTypeListener.onGameTypeChanged(gameType);
         }
         startNewGame();
     }
-
 
     private void updateHighScore() {
         Map<GameType, HighScore> highScoreMap = gameModel.getHighScore();
@@ -179,8 +171,7 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         try {
             HighScoreManager.saveHighScore(gameModel.getHighScore());
         } catch (IOException e) {
-            System.out.println("Невозможно записать файл " + e.getMessage());
+            e.printStackTrace();
         }
-
     }
 }

@@ -1,16 +1,11 @@
 package ru.kogtev.controller;
 
-import ru.kogtev.models.GameDifficulty;
 import ru.kogtev.models.GameModel;
-import ru.kogtev.models.HighScore;
-import ru.kogtev.models.TimerManager;
+
 import ru.kogtev.view.*;
 
-import java.util.ArrayList;
-import java.util.Map;
-
 public class GameController implements GameStartListener, CellEventListener, GameTypeListener {
-    private View view;
+    private final View view;
     private GameModel gameModel;
 
     public GameController(View view, GameModel gameModel) {
@@ -18,13 +13,12 @@ public class GameController implements GameStartListener, CellEventListener, Gam
         this.gameModel = gameModel;
 
         view.addCellEventListener(this);
-        view.addGameStartListener(this::onStartGame);
+        view.addGameStartListener(this);
         view.addGameTypeListener(this);
     }
 
     @Override
     public void onStartGame() {
-        TimerManager.timerListeners = new ArrayList<>();
         gameModel.start();
     }
 
@@ -35,7 +29,7 @@ public class GameController implements GameStartListener, CellEventListener, Gam
                 gameModel.openCell(x, y);
                 break;
             case RIGHT_BUTTON:
-                gameModel.toggleFlag(x, y);
+                gameModel.toggleCellFlag(x, y);
                 break;
             case MIDDLE_BUTTON:
                 gameModel.openSurroundingCellsIfFlagged(x, y);
@@ -49,15 +43,5 @@ public class GameController implements GameStartListener, CellEventListener, Gam
         view.setGameModel(gameModel);
         view.getMainWindow().createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
         onStartGame();
-        System.out.println(gameModel.getBoardModel().toString());
-
     }
-
-    public GameModel getGameModel() {
-        return gameModel;
-    }
-
-
-
-
 }
