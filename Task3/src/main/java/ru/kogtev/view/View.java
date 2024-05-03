@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class View implements CellUpdateListener, GameStateListener, TimerListener, BombListener {
-    private GameModel gameModel;
+public class View implements CellUpdateListener, GameFieldListener, GameStateListener, TimerListener, BombListener {
+    private final GameModel gameModel;
     private final MainWindow mainWindow = new MainWindow();
     private final HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
     private final SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
@@ -25,7 +25,7 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         mainWindow.setHighScoresMenuAction(e -> highScoresWindow.setVisible(true));
         mainWindow.setExitMenuAction(e -> mainWindow.dispose());
 
-        gameModel.getBoardModel().addCellUpdateListener(this);
+        gameModel.getGameBoard().addCellUpdateListener(this);
         mainWindow.setCellListener(this::notifyCellEventListener);
         settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
 
@@ -36,13 +36,14 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
     }
 
     private void startNewGame() {
-        gameModel.getBoardModel().addCellUpdateListener(this);
+        gameModel.getGameBoard().addCellUpdateListener(this);
         mainWindow.setCellListener(this::notifyCellEventListener);
         gameModel.addGameStateListener(this);
         settingsWindow.setGameTypeListener(this::notifyGameTypeListener);
         gameModel.addBombCountListener(this);
+        gameModel.addGameFieldListener(this);
 
-        mainWindow.createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
+        mainWindow.createGameField(gameModel.getGameBoard().getRows(), gameModel.getGameBoard().getCols());
         mainWindow.setVisible(true);
 
         notifyGameStartListener();
@@ -77,14 +78,6 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         }
     }
 
-    public MainWindow getMainWindow() {
-        return mainWindow;
-    }
-
-    public void setGameModel(GameModel gameModel) {
-        this.gameModel = gameModel;
-    }
-
     @Override
     public void onTimerTick(int elapsedTime) {
         mainWindow.setTimerValue(elapsedTime);
@@ -117,6 +110,10 @@ public class View implements CellUpdateListener, GameStateListener, TimerListene
         loseWindow.setVisible(true);
     }
 
+    @Override
+    public void onGameFieldChanged(int rows, int cols) {
+        mainWindow.createGameField(rows, cols);
+    }
 
     private void showRecordsWindow() {
         RecordsWindow recordsWindow = new RecordsWindow(mainWindow);

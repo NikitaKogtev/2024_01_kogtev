@@ -17,16 +17,16 @@ public class GameDifficulty {
 
     }
 
-    public static BoardModel gameDifficultyChoose(GameType gameType) {
+    public static GameBoard gameDifficultyChoose(GameType gameType) {
         switch (gameType) {
             case NOVICE:
-                return new BoardModel(NOVICE_ROWS_AMOUNT, NOVICE_COLS_AMOUNT, NOVICE_MINES_AMOUNT);
+                return new GameBoard(NOVICE_ROWS_AMOUNT, NOVICE_COLS_AMOUNT, NOVICE_MINES_AMOUNT);
             case MEDIUM:
-                return new BoardModel(MEDIUM_ROWS_AMOUNT, MEDIUM_COLS_AMOUNT, MEDIUM_MINES_AMOUNT);
+                return new GameBoard(MEDIUM_ROWS_AMOUNT, MEDIUM_COLS_AMOUNT, MEDIUM_MINES_AMOUNT);
             case EXPERT:
-                return new BoardModel(EXPERT_ROWS_AMOUNT, EXPERT_COLS_AMOUNT, EXPERT_MINES_AMOUNT);
+                return new GameBoard(EXPERT_ROWS_AMOUNT, EXPERT_COLS_AMOUNT, EXPERT_MINES_AMOUNT);
         }
-        return new BoardModel(NOVICE_ROWS_AMOUNT, NOVICE_COLS_AMOUNT, NOVICE_MINES_AMOUNT);
+        return new GameBoard(NOVICE_ROWS_AMOUNT, NOVICE_COLS_AMOUNT, NOVICE_MINES_AMOUNT);
     }
 
 }

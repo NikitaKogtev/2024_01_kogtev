@@ -5,8 +5,8 @@ import ru.kogtev.view.GameType;
 import java.util.*;
 
 public class GameModel {
-    private final BoardModel boardModel;
-    private final GameType gameType;
+    private GameBoard gameBoard;
+    private GameType gameType;
 
     private boolean firstClick;
     private int remainingMines;
@@ -16,24 +16,45 @@ public class GameModel {
 
     private List<GameStateListener> gameStateListeners = new ArrayList<>();
     private final List<BombListener> bombListeners = new ArrayList<>();
+    private final List<GameFieldListener> gameFieldListeners = new ArrayList<>();
 
     private final Map<GameType, HighScore> highScore;
 
     public GameModel(GameType gameType) {
         this.gameType = gameType;
 
-        boardModel = GameDifficulty.gameDifficultyChoose(gameType);
+        gameBoard = GameDifficulty.gameDifficultyChoose(gameType);
         highScore = HighScoreManager.initializeHighScore();
+
         notifyBombCount();
     }
 
     public void start() {
         timerUpdater();
-        boardModel.initCells();
+
+        gameBoard.initCells();
+
         gameLost = false;
         gameWon = false;
         firstClick = true;
-        remainingMines = boardModel.getTotalMines();
+        remainingMines = gameBoard.getTotalMines();
+
+        notifyBombCount();
+    }
+
+    public void changeGameType(GameType newGameType) {
+        gameType = newGameType;
+
+        gameBoard = GameDifficulty.gameDifficultyChoose(newGameType);
+        gameBoard.initCells();
+
+        gameLost = false;
+        gameWon = false;
+        firstClick = true;
+        remainingMines = gameBoard.getTotalMines();
+
+        notifyGameFieldChanged(gameBoard.getRows(), gameBoard.getCols());
+
         notifyBombCount();
     }
 
@@ -44,20 +65,19 @@ public class GameModel {
     }
 
     public void openCell(int row, int col) {
-        notifyBombCount();
         if (firstClick) {
-            boardModel.generateCellValueOnBoard(row, col, true);
+            gameBoard.generateCellValueOnBoard(row, col, true);
             TimerManager.startTimer();
             firstClick = false;
         }
 
-        if (getBoardModel().isCellOpened(row, col) || getBoardModel().getFlaggedCellValue(row, col)) {
+        if (getGameBoard().isCellOpened(row, col) || getGameBoard().getFlaggedCellValue(row, col)) {
             return;
         }
 
-        boardModel.setOpenedCellValue(row, col, true);
+        gameBoard.setOpenedCellValue(row, col, true);
 
-        if (boardModel.getBoardCellValue(row, col) == -1) {
+        if (gameBoard.getBoardCellValue(row, col) == -1) {
             gameLost = true;
             openAllMines();
             TimerManager.stopTimer();
@@ -65,7 +85,7 @@ public class GameModel {
             return;
         }
 
-        if (boardModel.getBoardCellValue(row, col) == 0) {
+        if (gameBoard.getBoardCellValue(row, col) == 0) {
             openAdjacentCells(row, col);
         }
 
@@ -74,12 +94,12 @@ public class GameModel {
     }
 
     private boolean isValidCell(int row, int col) {
-        return row >= 0 && row < boardModel.getRows() && col >= 0 && col < boardModel.getCols();
+        return row >= 0 && row < gameBoard.getRows() && col >= 0 && col < gameBoard.getCols();
     }
 
     private boolean isValidCellNotOpenedAndFlag(int nRow, int nCol) {
-        return isValidCell(nRow, nCol) && !boardModel.isCellOpened(nRow, nCol) &&
-                !boardModel.getFlaggedCellValue(nRow, nCol);
+        return isValidCell(nRow, nCol) && !gameBoard.isCellOpened(nRow, nCol) &&
+                !gameBoard.getFlaggedCellValue(nRow, nCol);
     }
 
     private void openAdjacentCells(int row, int col) {
@@ -91,9 +111,9 @@ public class GameModel {
 
                 if (isValidCellNotOpenedAndFlag(nRow, nCol)) {
 
-                    boardModel.setOpenedCellValue(nRow, nCol, true);
+                    gameBoard.setOpenedCellValue(nRow, nCol, true);
 
-                    if (boardModel.getBoardCellValue(nRow, nCol) == 0) {
+                    if (gameBoard.getBoardCellValue(nRow, nCol) == 0) {
                         openAdjacentCells(nRow, nCol);
                     }
                 }
@@ -102,14 +122,14 @@ public class GameModel {
     }
 
     public void toggleCellFlag(int row, int col) {
-        if (remainingMines == 0 && !boardModel.getFlaggedCellValue(row, col)
-                || boardModel.isCellOpened(row, col)) {
+        if (remainingMines == 0 && !gameBoard.getFlaggedCellValue(row, col)
+                || gameBoard.isCellOpened(row, col)) {
             return;
         }
 
-        boardModel.setFlaggedCellValue(row, col, !boardModel.getFlaggedCellValue(row, col));
+        gameBoard.setFlaggedCellValue(row, col, !gameBoard.getFlaggedCellValue(row, col));
 
-        if (boardModel.getFlaggedCellValue(row, col)) {
+        if (gameBoard.getFlaggedCellValue(row, col)) {
             remainingMines--;
             notifyBombCount();
         } else {
@@ -119,14 +139,14 @@ public class GameModel {
     }
 
     public void openSurroundingCellsIfFlagged(int row, int col) {
-        if (!isValidCell(row, col) || !boardModel.isCellOpened(row, col)
-                || boardModel.getBoardCellValue(row, col) == 0) {
+        if (!isValidCell(row, col) || !gameBoard.isCellOpened(row, col)
+                || gameBoard.getBoardCellValue(row, col) == 0) {
             return;
         }
 
         int flagsAround = countFlagsAround(row, col);
 
-        if (flagsAround == boardModel.getBoardCellValue(row, col)) {
+        if (flagsAround == gameBoard.getBoardCellValue(row, col)) {
             for (int dRow = -1; dRow <= 1; dRow++) {
                 for (int dCol = -1; dCol <= 1; dCol++) {
                     int nRow = row + dRow;
@@ -149,7 +169,7 @@ public class GameModel {
                 int nRow = row + dRow;
                 int nCol = col + dCol;
 
-                if (isValidCell(nRow, nCol) && boardModel.getFlaggedCellValue(nRow, nCol)) {
+                if (isValidCell(nRow, nCol) && gameBoard.getFlaggedCellValue(nRow, nCol)) {
                     count++;
                 }
 
@@ -159,10 +179,10 @@ public class GameModel {
     }
 
     private void checkGameWon() {
-        for (int row = 0; row < boardModel.getRows(); row++) {
-            for (int col = 0; col < boardModel.getCols(); col++) {
+        for (int row = 0; row < gameBoard.getRows(); row++) {
+            for (int col = 0; col < gameBoard.getCols(); col++) {
 
-                if (boardModel.getBoardCellValue(row, col) != -1 && !boardModel.isCellOpened(row, col)) {
+                if (gameBoard.getBoardCellValue(row, col) != -1 && !gameBoard.isCellOpened(row, col)) {
                     return;
                 }
 
@@ -175,11 +195,11 @@ public class GameModel {
     }
 
     public void openAllMines() {
-        for (int row = 0; row < boardModel.getRows(); row++) {
-            for (int col = 0; col < boardModel.getCols(); col++) {
+        for (int row = 0; row < gameBoard.getRows(); row++) {
+            for (int col = 0; col < gameBoard.getCols(); col++) {
 
-                if (boardModel.getBoardCellValue(row, col) == -1) {
-                    boardModel.setOpenedCellValue(row, col, true);
+                if (gameBoard.getBoardCellValue(row, col) == -1) {
+                    gameBoard.setOpenedCellValue(row, col, true);
                 }
 
             }
@@ -194,8 +214,8 @@ public class GameModel {
         return false;
     }
 
-    public BoardModel getBoardModel() {
-        return boardModel;
+    public GameBoard getGameBoard() {
+        return gameBoard;
     }
 
     public Map<GameType, HighScore> getHighScore() {
@@ -204,6 +224,17 @@ public class GameModel {
 
     public GameType getGameType() {
         return gameType;
+    }
+
+
+    public void addGameFieldListener(GameFieldListener gameFieldListener) {
+        gameFieldListeners.add(gameFieldListener);
+    }
+
+    private void notifyGameFieldChanged(int rows, int cols) {
+        for (GameFieldListener gameFieldListener : gameFieldListeners) {
+            gameFieldListener.onGameFieldChanged(rows, cols);
+        }
     }
 
     public void setGameStateListeners(List<GameStateListener> gameStateListeners) {

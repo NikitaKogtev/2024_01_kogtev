@@ -6,7 +6,7 @@ import ru.kogtev.view.*;
 
 public class GameController implements GameStartListener, CellEventListener, GameTypeListener {
     private final View view;
-    private GameModel gameModel;
+    private final GameModel gameModel;
 
     public GameController(View view, GameModel gameModel) {
         this.view = view;
@@ -39,9 +39,7 @@ public class GameController implements GameStartListener, CellEventListener, Gam
 
     @Override
     public void onGameTypeChanged(GameType gameType) {
-        gameModel = new GameModel(gameType);
-        view.setGameModel(gameModel);
-        view.getMainWindow().createGameField(gameModel.getBoardModel().getRows(), gameModel.getBoardModel().getCols());
+        gameModel.changeGameType(gameType);
         onStartGame();
     }
 }

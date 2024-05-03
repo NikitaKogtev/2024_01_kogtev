@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class BoardModel {
+public class GameBoard {
     private final int rows;
     private final int cols;
 
@@ -16,7 +16,7 @@ public class BoardModel {
 
     private final Random random = new Random();
 
-    public BoardModel(int rows, int cols, int totalMines) {
+    public GameBoard(int rows, int cols, int totalMines) {
         this.rows = rows;
         this.cols = cols;
         this.totalMines = totalMines;
