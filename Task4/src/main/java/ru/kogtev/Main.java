@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
     private static final Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
@@ -20,38 +19,34 @@ public class Main {
             logger.info("Начало работы приложения");
 
             logger.info("Введите значение для расчета диапазона: ");
-            long valueNum = Integer.parseInt(reader.readLine());
+            long valueNum = Long.parseLong(reader.readLine());
 
             logger.info("Диапазон для вычисления суммы равен: {}", valueNum);
 
-            ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
-            logger.info("Создано {} потоков", NUM_THREADS);
+            int numThreads = Math.min(Runtime.getRuntime().availableProcessors(), (int) valueNum);
 
-            long chunksSize = valueNum / NUM_THREADS;
+            ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+            logger.info("Создано {} потоков", numThreads);
+
+            long chunksSize = valueNum / numThreads;
             logger.info("Вычисление разбито на диапазоны: {}", chunksSize);
 
-            Task[] tasks = new Task[NUM_THREADS];
+            Task[] tasks = new Task[numThreads];
 
-            for (int i = 0; i < NUM_THREADS; i++) {
+            for (int i = 0; i < numThreads; i++) {
                 long start = i * chunksSize;
-                long end;
+                long end = Math.min((i + 1) * chunksSize, valueNum);
 
-                if (i == NUM_THREADS - 1) {
-                    end = valueNum;
-                } else {
-                    end = (i + 1) * chunksSize;
-                }
-
-                tasks[i] = new Task(start, end);
+                tasks[i] = new Task(start, end, valueNum);
                 executorService.submit(tasks[i]);
-                logger.info("Отправка {} пула потоков", i);
+                logger.info("Отправка {} пула потоков", i + 1);
             }
 
             executorService.shutdown();
             logger.info("Упорядоченное завершение работы");
 
 
-            executorService.awaitTermination(60, TimeUnit.SECONDS);
+            executorService.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
             logger.info("Завершение и ожидание пока все задачи не завершаться");
 
             double totalSum = 0;
