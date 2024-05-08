@@ -10,15 +10,15 @@ public class ServerMain {
     public static final int PORT = 8899;
 
     private static final Set<String> usernames = new HashSet<>(); // Множество для хранения имен пользователей
-    private static List<PrintWriter> clients = new ArrayList<>(); // Список для хранения идентификаторов (Writer'ов) подключенных клиентов
+    private static final List<PrintWriter> clients = new ArrayList<>(); // Список для хранения идентификаторов (Writer'ов) подключенных клиентов
 
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Сервер запущен с портом: " + PORT);
+            System.out.println("Server is running on port " + PORT);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept(); // Принимаем входящее подключение
-                System.out.println("Новый клиент подключился");
+                System.out.println("New client connected");
 
                 ClientHandler clientHandler = new ClientHandler(clientSocket); // Создаем обработчик клиента
                 new Thread(clientHandler).start();
@@ -51,20 +51,20 @@ public class ServerMain {
                 printWriter = new PrintWriter(outputStreamWriter, true);  // Создаем поток вывода для отправки сообщений клиенту
                 bufferedReader = new BufferedReader(inputStreamReader);   // Создаем поток ввода для чтения сообщений от клиента
 
-                printWriter.println("Введите свое имя: ");
+                printWriter.println("Enter your username: ");
                 username = bufferedReader.readLine();
 
                 // Проверяем, что имя не занято другим клиентом
                 synchronized (usernames) {
                     while (usernames.contains(username)) {
-                        printWriter.println("Это имя пользователя уже существует. Введите другое имя пользователя: ");
+                        printWriter.println("This username is already taken. Please enter a different username: ");
                         username = bufferedReader.readLine();
                     }
 
                     usernames.add(username); // Добавляем имя клиента в множество имен
                 }
 
-                printWriter.println(username + " подключен к чату. Добро пожаловать!");
+                printWriter.println("Welcome to the chat, " + username + "!");
                 broadcast(username + " has joined the chat"); // Рассылаем всем клиентам сообщение о присоединении нового участника
 
                 clients.add(printWriter); // Добавляем поток вывода клиента в список активных клиентов
