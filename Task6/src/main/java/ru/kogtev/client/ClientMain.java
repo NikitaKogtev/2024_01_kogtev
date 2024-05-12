@@ -2,6 +2,8 @@ package ru.kogtev.client;
 
 import java.io.*;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,7 +15,7 @@ public class ClientMain {
 
     private static ChatWindow chatWindow;
 
-    protected static final Set<String> usernames = new HashSet<>();
+    protected static final Set<String> usernames = new HashSet<>(); //перенсти в serverListener
 
     public static void main(String[] args) {
         chatWindow = new ChatWindow();
@@ -36,7 +38,10 @@ public class ClientMain {
 
     public static void sendMessage(String message) {
         if (out != null) {
-            out.println(message); // Отправляем сообщение на сервер
+            // Получаем текущее время и дату
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            // Добавляем дату к сообщению перед отправкой на сервер
+            out.println("[" + timestamp + " ] " + message);
         } else {
             appendMessage("Error: Not connected to the server");
         }
