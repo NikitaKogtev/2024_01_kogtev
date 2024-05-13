@@ -5,10 +5,14 @@ public class Resource {
     private final int id;
 
     public Resource() {
-        this.id = nextId++;
+        this.id = getNextId();
     }
 
     public int getId() {
         return id;
+    }
+
+    private static synchronized int getNextId() {
+        return nextId++;
     }
 }
