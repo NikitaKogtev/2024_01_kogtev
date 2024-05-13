@@ -105,13 +105,26 @@ public class ChatWindow extends JFrame {
         return username;
     }
 
-    public void updateUserList(Set<String> userList) {
+    public void updateUserList(Set<String> users) {
         DefaultListModel<String> listModel = new DefaultListModel<>();
-        for (String user : userList) {
+        // Очистить текущий список пользователей
+        listModel.clear();
+
+        // Добавить всех пользователей из множества
+        for (String user : users) {
             listModel.addElement(user);
         }
+
         this.userList.setModel(listModel);
     }
+
+//    public void updateUserList(Set<String> userList) {
+//        DefaultListModel<String> listModel = new DefaultListModel<>();
+//        for (String user : userList) {
+//            listModel.addElement(user);
+//        }
+//        this.userList.setModel(listModel);
+//    }
 
 }
 

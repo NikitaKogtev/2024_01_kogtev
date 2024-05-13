@@ -1,5 +1,8 @@
 package ru.kogtev.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.kogtev.common.Message;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -9,17 +12,61 @@ import java.util.List;
 import java.util.Set;
 
 public class ClientHandler implements Runnable {
-    public static Set<String> usernames = new HashSet<>(); // Множество для хранения имен пользователей
-    public static List<PrintWriter> clients = new ArrayList<>(); // Список для хранения идентификаторов (Writer'ов) подключенных клиентов
-
     private final Socket clientSocket;
-    private String username;
-    PrintWriter printWriter;
-    BufferedReader bufferedReader;
+    private ServerMain serverMain;
 
-    public ClientHandler(Socket clientSocket) {
+    private String username;
+    private PrintWriter outMessage;
+    private BufferedReader reader;
+    private ObjectMapper objectMapper;
+
+
+    public ClientHandler(Socket clientSocket, ServerMain serverMain) {
         this.clientSocket = clientSocket;
-        broadcastUserList();
+        this.serverMain = serverMain;
+        this.objectMapper = new ObjectMapper(); // Создаем объект ObjectMapper для сериализации объектов в JSON
+        serverMain.broadcastUserList();
+    }
+
+
+//    public void sendMessage(String message){
+//        System.out.println(message + "sendMessage");
+//        try{
+//            outMessage.println(message);
+//        }catch (Exception e){
+//
+//        }
+//    }
+
+    public void sendMessage(String jsonMessage) {
+        try {
+            // Десериализуем JSON в объект Message
+            Message message = objectMapper.readValue(jsonMessage, Message.class);
+            // Преобразуем объект Message обратно в JSON-строку
+            String messageString = objectMapper.writeValueAsString(message);
+            // Выводим JSON-строку на консоль
+            outMessage.println(messageString);
+            System.out.println(messageString);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendUser(String message){
+        try{
+            outMessage.println(message);
+        }catch (Exception e){
+
+        }
+    }
+
+    public void closeConnection(){
+        serverMain.removeClient(this);
+        serverMain.broadcast(new Message(username,"Server has left the chat"));
+    }
+
+    public boolean isUsernameAvailable(String username) {
+        return serverMain.getUsernames().contains(username);
     }
 
     @Override
@@ -29,49 +76,48 @@ public class ClientHandler implements Runnable {
              InputStreamReader inputStreamReader =
                      new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8)) {
 
-            printWriter = new PrintWriter(outputStreamWriter, true);
-            bufferedReader = new BufferedReader(inputStreamReader);
+            outMessage = new PrintWriter(outputStreamWriter, true);
+            reader = new BufferedReader(inputStreamReader);
 
             // Просим клиента ввести имя
             //   printWriter.println("Enter your username: ");
-            username = bufferedReader.readLine();
+            username = reader.readLine();
 
             // Проверяем доступность имени пользователя
 
             while (isUsernameAvailable(username)) {
-                printWriter.println("This username is already taken. Please enter a different username: ");
-                username = bufferedReader.readLine();
+                outMessage.println("This username is already taken. Please enter a different username: ");
+                username = reader.readLine();
             }
 
             // Добавляем имя клиента в множество имен
-            addUser(username);
+            serverMain.addUsername(username);
 
             // Приветствуем клиента в чате
-            printWriter.println("Welcome to the chat, " + username + "!");
+           // outMessage.println(new Message("Server: " , "Welcome to the chat!"));
 
             // Добавляем поток вывода клиента в список активных клиентов
-            clients.add(printWriter);
 
             // Рассылаем всем клиентам сообщение о присоединении нового участника
-            broadcast(username + " has joined the chat");
+           // outMessage.println(username + "Server has joined the chat");
 
-            broadcastUserList();
+            serverMain.broadcastUserList();
 
             String inputLine;
             // Читаем сообщения от клиента и рассылаем их всем остальным клиентам
-            while ((inputLine = bufferedReader.readLine()) != null) {
-                broadcast(username + ": " + inputLine);
+            while ((inputLine = reader.readLine()) != null) {
+                serverMain.broadcast(new Message(username, inputLine));
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             // При отключении клиента удаляем его имя из множества имен, закрываем потоки и уведомляем остальных клиентов
             if (username != null) {
-                removeUser(username);
-                broadcast(username + " has left the chat");
+                serverMain.removeUsername(username);
+                serverMain.broadcast(new Message(username,"Server has left the chat"));
             }
-            if (printWriter != null) {
-                clients.remove(printWriter);
+            if (outMessage != null) {
+                closeConnection();
             }
             try {
                 clientSocket.close(); // Закрываем сокет клиента
@@ -80,39 +126,4 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
-    // Метод для рассылки сообщения всем подключенным клиентам
-    private void broadcast(String message) {
-        synchronized (clients) {
-            for (PrintWriter client : clients) {
-                client.println(message);
-            }
-        }
-    }
-
-    public static synchronized boolean isUsernameAvailable(String username) {
-        return usernames.contains(username);
-    }
-
-    // Метод для добавления пользователя в список и рассылки обновленного списка всем клиентам
-    public synchronized void addUser(String username) {
-        usernames.add(username);
-        broadcastUserList();
-    }
-
-    // Метод для удаления пользователя из списка и рассылки обновленного списка всем клиентам
-    public synchronized void removeUser(String username) {
-        usernames.remove(username);
-        broadcastUserList();
-    }
-
-    // Метод для рассылки обновленного списка пользователей всем клиентам
-    private void broadcastUserList() {
-        for (PrintWriter client : clients) {
-            client.println("USERS: " + String.join(",", usernames));
-        }
-        System.out.println(usernames + "CH");
-    }
-
 }
-

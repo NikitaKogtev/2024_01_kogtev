@@ -1,5 +1,8 @@
 package ru.kogtev.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.kogtev.common.UserList;
+
 import java.io.*;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -49,7 +52,11 @@ public class ClientMain {
 
     public static void appendMessage(String message) {
         // Добавляем новое сообщение в окно чата
-        chatWindow.appendMessage(message);
+        chatWindow.appendMessage(message.toString());
+    }
+
+    public static void updateUserList(Set<String> users) {
+        chatWindow.updateUserList(users);
     }
 
     public static void appendUsername(String message) {
@@ -68,5 +75,18 @@ public class ClientMain {
 
         // Выводим список пользователей в консоль (это может быть удалено в финальной версии)
         System.out.println(usernames + "appendUsername");
+    }
+
+
+    public static void updateUserList(String message) {
+        // Парсим JSON-строку в объект UserList
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            UserList userList = objectMapper.readValue(message, UserList.class);
+            // Обновляем список пользователей в интерфейсе чата
+            chatWindow.updateUserList(userList.getUsers());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

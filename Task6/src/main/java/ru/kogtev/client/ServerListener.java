@@ -1,20 +1,23 @@
 package ru.kogtev.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.kogtev.common.Message;
+import ru.kogtev.common.UserList;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
 
 public class ServerListener implements Runnable {
     private Socket socket;
     private BufferedReader bufferedReader; // Поток ввода для чтения сообщений от сервера
-
+    private ObjectMapper objectMapper;
 
     public ServerListener(Socket socket) {
         this.socket = socket;
+        this.objectMapper = new ObjectMapper(); // Создаем объект ObjectMapper для десериализации JSON
     }
 
     @Override
@@ -25,16 +28,24 @@ public class ServerListener implements Runnable {
 
             bufferedReader = new BufferedReader(inputStreamReader); // Создаем поток ввода для чтения сообщений от сервера
 
-            String message;
-            // Читаем сообщения от сервера и выводим их в окно чата
+            String jsonMessage;
+            // Читаем JSON-строки от сервера и преобразуем их в объекты Message и UserList
 
-            while ((message = bufferedReader.readLine()) != null) {
-                // Проверяем, является ли сообщение списком пользователей
-                if (message.startsWith("USERS:")) {
-                    handleUserList(message.substring(6).trim()); // Обрабатываем список пользователей
-                } else {
-                    // Обрабатываем сообщение в чате
+            while ((jsonMessage = bufferedReader.readLine()) != null) {
+                System.out.println(jsonMessage);
+
+                try {
+                    Message message = objectMapper.readValue(jsonMessage, Message.class);
                     handleMessage(message);
+                } catch (IOException e) {
+                    // Возможно, это не сообщение, а список пользователей
+                    try {
+                        UserList userList = objectMapper.readValue(jsonMessage, UserList.class);
+                        handleUserList(userList);
+                    } catch (IOException ex) {
+                        // Обработка ошибок при чтении JSON
+                        ex.printStackTrace();
+                    }
                 }
             }
 
@@ -49,14 +60,12 @@ public class ServerListener implements Runnable {
         }
     }
 
-    private void handleMessage(String message) {
-        ClientMain.appendMessage(message);
+    private void handleMessage(Message message) {
+        System.out.println("Print");
+        ClientMain.appendMessage(message.getSender() + ": " + message.getContent());
     }
 
-    private void handleUserList(String userListMessage) {
-        ClientMain.appendUsername(userListMessage);
+    private void handleUserList(UserList userList) {
+        ClientMain.updateUserList(userList.getUsers());
     }
-
 }
-
-
