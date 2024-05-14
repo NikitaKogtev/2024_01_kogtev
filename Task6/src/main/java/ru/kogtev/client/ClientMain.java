@@ -21,9 +21,13 @@ public class ClientMain {
     protected static final Set<String> usernames = new HashSet<>(); //перенсти в serverListener
 
     public static void main(String[] args) {
-        chatWindow = new ChatWindow();
+
         connectToServer();
         chatWindow.display();
+    }
+
+    public ClientMain() {
+        chatWindow = new ChatWindow();
     }
 
     private static void connectToServer() {
@@ -44,7 +48,7 @@ public class ClientMain {
             // Получаем текущее время и дату
             String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             // Добавляем дату к сообщению перед отправкой на сервер
-            out.println("[" + timestamp + " ] " + message);
+            out.println(chatWindow.getUsername() + " [ " + timestamp + " ]: " + message);
         } else {
             appendMessage("Error: Not connected to the server");
         }
@@ -52,41 +56,41 @@ public class ClientMain {
 
     public static void appendMessage(String message) {
         // Добавляем новое сообщение в окно чата
-        chatWindow.appendMessage(message.toString());
+        chatWindow.appendMessage(message);
     }
 
     public static void updateUserList(Set<String> users) {
         chatWindow.updateUserList(users);
     }
 
-    public static void appendUsername(String message) {
-        // Разбиваем строку сообщения на список пользователей
-        String[] userList = message.split(",");
-
-        // Очищаем текущий список пользователей
-        usernames.clear();
-
-        // Добавляем всех пользователей из сообщения в множество
-        for (String username : userList) {
-            usernames.add(username);
-        }
-
-        chatWindow.updateUserList(usernames);
-
-        // Выводим список пользователей в консоль (это может быть удалено в финальной версии)
-        System.out.println(usernames + "appendUsername");
-    }
-
-
-    public static void updateUserList(String message) {
-        // Парсим JSON-строку в объект UserList
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            UserList userList = objectMapper.readValue(message, UserList.class);
-            // Обновляем список пользователей в интерфейсе чата
-            chatWindow.updateUserList(userList.getUsers());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void appendUsername(String message) {
+//        // Разбиваем строку сообщения на список пользователей
+//        String[] userList = message.split(",");
+//
+//        // Очищаем текущий список пользователей
+//        usernames.clear();
+//
+//        // Добавляем всех пользователей из сообщения в множество
+//        for (String username : userList) {
+//            usernames.add(username);
+//        }
+//
+//        chatWindow.updateUserList(usernames);
+//
+//        // Выводим список пользователей в консоль (это может быть удалено в финальной версии)
+//        System.out.println(usernames + "appendUsername");
+//    }
+//
+//
+//    public static void updateUserList(String message) {
+//        // Парсим JSON-строку в объект UserList
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            UserList userList = objectMapper.readValue(message, UserList.class);
+//            // Обновляем список пользователей в интерфейсе чата
+//            chatWindow.updateUserList(userList.getUsers());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

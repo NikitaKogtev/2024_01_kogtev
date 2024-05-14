@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Set;
 
 public class UserList {
-    private Set<String> users;
+    private final Set<String> users;
 
     @JsonCreator
     public UserList(@JsonProperty("users") Set<String> users) {

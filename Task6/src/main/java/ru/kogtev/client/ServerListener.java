@@ -61,7 +61,6 @@ public class ServerListener implements Runnable {
     }
 
     private void handleMessage(Message message) {
-        System.out.println("Print");
         ClientMain.appendMessage(message.getSender() + ": " + message.getContent());
     }
 

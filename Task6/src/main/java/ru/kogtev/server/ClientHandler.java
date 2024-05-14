@@ -6,14 +6,10 @@ import ru.kogtev.common.Message;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class ClientHandler implements Runnable {
     private final Socket clientSocket;
-    private ServerMain serverMain;
+    private final Server server;
 
     private String username;
     private PrintWriter outMessage;
@@ -21,52 +17,11 @@ public class ClientHandler implements Runnable {
     private ObjectMapper objectMapper;
 
 
-    public ClientHandler(Socket clientSocket, ServerMain serverMain) {
+    public ClientHandler(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
-        this.serverMain = serverMain;
+        this.server = server;
         this.objectMapper = new ObjectMapper(); // Создаем объект ObjectMapper для сериализации объектов в JSON
-        serverMain.broadcastUserList();
-    }
-
-
-//    public void sendMessage(String message){
-//        System.out.println(message + "sendMessage");
-//        try{
-//            outMessage.println(message);
-//        }catch (Exception e){
-//
-//        }
-//    }
-
-    public void sendMessage(String jsonMessage) {
-        try {
-            // Десериализуем JSON в объект Message
-            Message message = objectMapper.readValue(jsonMessage, Message.class);
-            // Преобразуем объект Message обратно в JSON-строку
-            String messageString = objectMapper.writeValueAsString(message);
-            // Выводим JSON-строку на консоль
-            outMessage.println(messageString);
-            System.out.println(messageString);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendUser(String message){
-        try{
-            outMessage.println(message);
-        }catch (Exception e){
-
-        }
-    }
-
-    public void closeConnection(){
-        serverMain.removeClient(this);
-        serverMain.broadcast(new Message(username,"Server has left the chat"));
-    }
-
-    public boolean isUsernameAvailable(String username) {
-        return serverMain.getUsernames().contains(username);
+        server.broadcastUserList();
     }
 
     @Override
@@ -80,41 +35,42 @@ public class ClientHandler implements Runnable {
             reader = new BufferedReader(inputStreamReader);
 
             // Просим клиента ввести имя
-            //   printWriter.println("Enter your username: ");
             username = reader.readLine();
 
             // Проверяем доступность имени пользователя
 
             while (isUsernameAvailable(username)) {
-                outMessage.println("This username is already taken. Please enter a different username: ");
+                outMessage.println(objectMapper.writeValueAsString(new Message("Server: ",
+                        "This username is already taken. Please enter a different username: ")));
                 username = reader.readLine();
             }
 
             // Добавляем имя клиента в множество имен
-            serverMain.addUsername(username);
+            server.addUsername(username);
 
             // Приветствуем клиента в чате
-           // outMessage.println(new Message("Server: " , "Welcome to the chat!"));
+            outMessage.println(objectMapper.writeValueAsString(new Message("Server: ",
+                    "Welcome to the chat, " + username + "!")));
 
             // Добавляем поток вывода клиента в список активных клиентов
 
             // Рассылаем всем клиентам сообщение о присоединении нового участника
-           // outMessage.println(username + "Server has joined the chat");
+            server.broadcastMessage(new Message("Server: ", username + " has joined the chat"));
 
-            serverMain.broadcastUserList();
+            server.broadcastUserList();
 
             String inputLine;
             // Читаем сообщения от клиента и рассылаем их всем остальным клиентам
             while ((inputLine = reader.readLine()) != null) {
-                serverMain.broadcast(new Message(username, inputLine));
+                server.broadcastMessage(new Message(username, inputLine));
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             // При отключении клиента удаляем его имя из множества имен, закрываем потоки и уведомляем остальных клиентов
             if (username != null) {
-                serverMain.removeUsername(username);
-                serverMain.broadcast(new Message(username,"Server has left the chat"));
+                server.removeUsername(username);
+                server.broadcastMessage(new Message("Server: ", username + " has left the chat"));
             }
             if (outMessage != null) {
                 closeConnection();
@@ -125,5 +81,22 @@ public class ClientHandler implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void sendMessage(String jsonMessage) {
+        outMessage.println(jsonMessage);
+    }
+
+    public void sendUser(String jsonMessage) {
+        outMessage.println(jsonMessage);
+    }
+
+    public boolean isUsernameAvailable(String username) {
+        return server.getUsernames().contains(username);
+    }
+
+    public void closeConnection() {
+        server.removeClient(this);
+        server.broadcastMessage(new Message("Server: ", username + " has left the chat"));
     }
 }

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Message {
-    private String sender;
-    private String content;
+    private final String sender;
+    private final String content;
 
     @JsonCreator
     public Message(@JsonProperty("sender") String sender, @JsonProperty("content") String content) {
@@ -19,13 +19,5 @@ public class Message {
 
     public String getContent() {
         return content;
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "sender='" + sender + '\'' +
-                ", content='" + content + '\'' +
-                '}';
     }
 }
