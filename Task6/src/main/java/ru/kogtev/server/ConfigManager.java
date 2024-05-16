@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.util.Properties;
 
 public final class ConfigManager {
-    private static final String PROPERTIES_FILE_NAME = "config.properties";
-    private static final String PORT = "PORT";
+    private static final String PROPERTIES_FILE_NAME = "chat.properties";
+    private static final String PORT_VALUE_IN_PROPERTIES_FILE = "PORT";
     private static final int DEFAULT_PORT_VALUE = 8899;
-
 
     private ConfigManager() {
 
@@ -18,22 +17,9 @@ public final class ConfigManager {
         Properties prop = new Properties();
         try (FileInputStream input = new FileInputStream(PROPERTIES_FILE_NAME)) {
             prop.load(input);
-            return Integer.parseInt(prop.getProperty(PORT));
+            return Integer.parseInt(prop.getProperty(PORT_VALUE_IN_PROPERTIES_FILE));
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Error with properties file : " + e.getMessage()); // Исправить формулировку
-            // Устанавливаем порт по умолчанию, если возникла ошибка при загрузке конфигурации
-            return DEFAULT_PORT_VALUE;
-        }
-    }
-
-    public static int getProperty(String propertiesFileName) {
-        Properties prop = new Properties();
-        try (FileInputStream input = new FileInputStream(propertiesFileName)) {
-            prop.load(input);
-            return Integer.parseInt(prop.getProperty(PORT));
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error with properties file : " + e.getMessage()); // Исправить формулировку
-            // Устанавливаем порт по умолчанию, если возникла ошибка при загрузке конфигурации
+            System.out.println("Error in the configuration file: " + e.getMessage());
             return DEFAULT_PORT_VALUE;
         }
     }

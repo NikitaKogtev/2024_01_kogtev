@@ -3,21 +3,21 @@ package ru.kogtev.client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Set;
 
 public class ChatWindow extends JFrame {
-    private JFrame frame;
+
     private JTextArea chatArea;
-    private JTextField messageField;
-    private JButton sendButton;
+
     private JList<String> userList;
 
+    private final Client client;
     private String serverAddress;
     private String username;
 
-    public ChatWindow() {
+    public ChatWindow(Client client) {
+        this.client = client;
+
         initializeServerAddress();
 
         initializeUsername();
@@ -29,7 +29,7 @@ public class ChatWindow extends JFrame {
         serverAddress = JOptionPane.showInputDialog(this, "Enter server address:",
                 "Connect settings", JOptionPane.QUESTION_MESSAGE);
         if (serverAddress == null) {
-            System.exit(2); // Если пользователь нажал отмену, закрываем приложение
+            System.exit(2);
         }
     }
 
@@ -37,17 +37,21 @@ public class ChatWindow extends JFrame {
         username = JOptionPane.showInputDialog(this, "Enter your name:",
                 "Your name", JOptionPane.QUESTION_MESSAGE);
         if (username == null) {
-            System.exit(2); // Если пользователь нажал отмену, закрываем приложение
+            System.exit(2);
         }
     }
 
 
     private void initialize() {
+        JTextField messageField;
+        JButton sendButton;
+        JFrame frame;
+
         frame = new JFrame();
         frame.setTitle("Chat - " + username);
 
         frame.setBounds(100, 100, 600, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BorderLayout());
 
         chatArea = new JTextArea();
@@ -64,13 +68,11 @@ public class ChatWindow extends JFrame {
 
         sendButton = new JButton("Send");
 
-        sendButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String message = messageField.getText().trim();
-                if (!message.isEmpty()) {
-                    ClientMain.sendMessage(message);
-                    messageField.setText("");
-                }
+        sendButton.addActionListener(e -> {
+            String message = messageField.getText().trim();
+            if (!message.isEmpty()) {
+                client.sendMessageToServer(message);
+                messageField.setText("");
             }
         });
 
@@ -87,13 +89,12 @@ public class ChatWindow extends JFrame {
 
         JScrollPane userListScrollPane = new JScrollPane(userList);
         userListPanel.add(userListScrollPane, BorderLayout.CENTER);
-    }
 
-    public void display() {
         frame.setVisible(true);
     }
 
     public void appendMessage(String message) {
+        setTitle(username);
         chatArea.append(message + "\n");
     }
 
@@ -107,24 +108,13 @@ public class ChatWindow extends JFrame {
 
     public void updateUserList(Set<String> users) {
         DefaultListModel<String> listModel = new DefaultListModel<>();
-        // Очистить текущий список пользователей
         listModel.clear();
 
-        // Добавить всех пользователей из множества
         for (String user : users) {
             listModel.addElement(user);
         }
 
         this.userList.setModel(listModel);
     }
-
-//    public void updateUserList(Set<String> userList) {
-//        DefaultListModel<String> listModel = new DefaultListModel<>();
-//        for (String user : userList) {
-//            listModel.addElement(user);
-//        }
-//        this.userList.setModel(listModel);
-//    }
-
 }
 

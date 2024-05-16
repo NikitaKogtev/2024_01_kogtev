@@ -8,19 +8,20 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class ClientHandler implements Runnable {
+    private static final String SERVER_NAME = "Server: ";
+
     private final Socket clientSocket;
     private final Server server;
 
     private String username;
-    private PrintWriter outMessage;
-    private BufferedReader reader;
-    private ObjectMapper objectMapper;
+    private PrintWriter writer;
+    private final ObjectMapper objectMapper;
 
 
     public ClientHandler(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
-        this.objectMapper = new ObjectMapper(); // Создаем объект ObjectMapper для сериализации объектов в JSON
+        this.objectMapper = new ObjectMapper();
         server.broadcastUserList();
     }
 
@@ -29,66 +30,55 @@ public class ClientHandler implements Runnable {
         try (OutputStreamWriter outputStreamWriter =
                      new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8);
              InputStreamReader inputStreamReader =
-                     new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8)) {
+                     new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(inputStreamReader)) {
 
-            outMessage = new PrintWriter(outputStreamWriter, true);
-            reader = new BufferedReader(inputStreamReader);
+            writer = new PrintWriter(outputStreamWriter, true);
 
-            // Просим клиента ввести имя
             username = reader.readLine();
 
-            // Проверяем доступность имени пользователя
-
             while (isUsernameAvailable(username)) {
-                outMessage.println(objectMapper.writeValueAsString(new Message("Server: ",
+                writer.println(objectMapper.writeValueAsString(new Message(SERVER_NAME,
                         "This username is already taken. Please enter a different username: ")));
                 username = reader.readLine();
             }
 
-            // Добавляем имя клиента в множество имен
             server.addUsername(username);
 
-            // Приветствуем клиента в чате
-            outMessage.println(objectMapper.writeValueAsString(new Message("Server: ",
+            writer.println(objectMapper.writeValueAsString(new Message(SERVER_NAME,
                     "Welcome to the chat, " + username + "!")));
 
-            // Добавляем поток вывода клиента в список активных клиентов
-
-            // Рассылаем всем клиентам сообщение о присоединении нового участника
-            server.broadcastMessage(new Message("Server: ", username + " has joined the chat"));
-
+            server.broadcastMessage(new Message(SERVER_NAME, username + " has joined the chat"));
             server.broadcastUserList();
 
             String inputLine;
-            // Читаем сообщения от клиента и рассылаем их всем остальным клиентам
             while ((inputLine = reader.readLine()) != null) {
                 server.broadcastMessage(new Message(username, inputLine));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("The message was not sent" + e.getMessage());
         } finally {
-            // При отключении клиента удаляем его имя из множества имен, закрываем потоки и уведомляем остальных клиентов
             if (username != null) {
                 server.removeUsername(username);
-                server.broadcastMessage(new Message("Server: ", username + " has left the chat"));
+                server.broadcastMessage(new Message(SERVER_NAME, username + " has left the chat"));
             }
-            if (outMessage != null) {
+            if (writer != null) {
                 closeConnection();
             }
             try {
-                clientSocket.close(); // Закрываем сокет клиента
+                clientSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("The client socket could not be closed" + e.getMessage());
             }
         }
     }
 
     public void sendMessage(String jsonMessage) {
-        outMessage.println(jsonMessage);
+        writer.println(jsonMessage);
     }
 
     public void sendUser(String jsonMessage) {
-        outMessage.println(jsonMessage);
+        writer.println(jsonMessage);
     }
 
     public boolean isUsernameAvailable(String username) {
@@ -97,6 +87,6 @@ public class ClientHandler implements Runnable {
 
     public void closeConnection() {
         server.removeClient(this);
-        server.broadcastMessage(new Message("Server: ", username + " has left the chat"));
+        server.broadcastMessage(new Message(SERVER_NAME, username + " has left the chat"));
     }
 }
