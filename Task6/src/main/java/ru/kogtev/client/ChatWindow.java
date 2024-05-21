@@ -13,6 +13,7 @@ public class ChatWindow extends JFrame {
 
     private final Client client;
     private String serverAddress;
+    private String port;
     private String username;
 
     public ChatWindow(Client client) {
@@ -29,6 +30,14 @@ public class ChatWindow extends JFrame {
         serverAddress = JOptionPane.showInputDialog(this, "Enter server address:",
                 "Connect settings", JOptionPane.QUESTION_MESSAGE);
         if (serverAddress == null) {
+            System.exit(2);
+        }
+    }
+
+    private void initializePort() {
+        port = JOptionPane.showInputDialog(this, "Enter port:",
+                "Port settings", JOptionPane.QUESTION_MESSAGE);
+        if (port == null) {
             System.exit(2);
         }
     }

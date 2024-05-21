@@ -1,7 +1,9 @@
 package ru.kogtev.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.kogtev.common.ChatMessage;
 import ru.kogtev.common.Message;
+import ru.kogtev.common.UserListMessage;
 
 import java.io.*;
 import java.net.Socket;
@@ -43,22 +45,12 @@ public class ClientHandler implements Runnable {
             // Чтение и обработка обычных сообщений
             String inputLine;
             while ((inputLine = reader.readLine()) != null) {
-                server.broadcastMessage(new Message(username, inputLine));
+                server.broadcastMessage(new ChatMessage(username, inputLine));
             }
         } catch (IOException e) {
             System.out.println("The message was not sent: " + e.getMessage());
         } finally {
-            if (username != null) {
-                server.removeUsername(username);
-            }
-            if (writer != null) {
-                closeConnection();
-            }
-            try {
-                clientSocket.close();
-            } catch (IOException e) {
-                System.out.println("The client socket could not be closed: " + e.getMessage());
-            }
+            closeConnection();
         }
     }
 
@@ -84,16 +76,16 @@ public class ClientHandler implements Runnable {
                 }
 
                 System.out.println("Вводим еще раз пользователя");
-                writer.println(objectMapper.writeValueAsString(new Message(SERVER_NAME,
+                writer.println(objectMapper.writeValueAsString(new ChatMessage(SERVER_NAME,
                         "This username is already taken. Please enter a different username: ")));
                 username = reader.readLine();
             }
 
-            writer.println(objectMapper.writeValueAsString(new Message(SERVER_NAME,
+            writer.println(objectMapper.writeValueAsString(new ChatMessage(SERVER_NAME,
                     "Welcome to the chat, " + username + "!")));
 
-            server.broadcastMessage(new Message(SERVER_NAME, username + " has joined the chat"));
-            server.broadcastUserList();
+            server.broadcastMessage(new ChatMessage(SERVER_NAME, username + " has joined the chat"));
+            server.broadcastMessage(new UserListMessage(server.getUsernames()));
         } catch (IOException | InterruptedException e) {
             System.out.println("Error while setting username: " + e.getMessage());
         }
@@ -104,16 +96,23 @@ public class ClientHandler implements Runnable {
         writer.println(jsonMessage);
     }
 
-    public void sendUser(String jsonMessage) {
-        writer.println(jsonMessage);
-    }
 
     public boolean isUsernameAvailable(String username) {
         return !server.getUsernames().contains(username);
     }
 
     public void closeConnection() {
+        if (username != null) {
+            server.removeUsername(username);
+        }
+        if (writer != null) {
+            writer.close();
+        }
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            System.out.println("The client socket could not be closed: " + e.getMessage());
+        }
         server.removeClient(this);
-
     }
 }

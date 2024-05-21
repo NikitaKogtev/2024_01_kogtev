@@ -1,8 +1,10 @@
 package ru.kogtev.client;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.kogtev.common.ChatMessage;
 import ru.kogtev.common.Message;
-import ru.kogtev.common.UserList;
+import ru.kogtev.common.UserListMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,22 +51,28 @@ public class ServerListener implements Runnable {
     private void processJsonMessage(String jsonMessage) {
         try {
             Message message = objectMapper.readValue(jsonMessage, Message.class);
-            handleMessage(message);
-        } catch (IOException e) {
-            try {
-                UserList userList = objectMapper.readValue(jsonMessage, UserList.class);
-                handleUserList(userList);
-            } catch (IOException ex) {
-                System.out.println("The message cannot be converted" + ex.getMessage());
+            String messageType = message.getClass().getAnnotation(JsonTypeName.class).value();
+
+            switch (messageType) {
+                case "message":
+                    handleMessage((ChatMessage) message);
+                    break;
+                case "userList":
+                    handleUserList((UserListMessage) message);
+                    break;
+                default:
+                    System.out.println("Unknown message type received: " + messageType);
             }
+        } catch (IOException e) {
+            System.out.println("The message cannot be processed: " + e.getMessage());
         }
     }
 
-    private void handleMessage(Message message) {
-        client.appendMessageToChat(message.getSender() + SEPARATOR + message.getContent());
+    private void handleMessage(ChatMessage chatMessage) {
+        client.appendMessageToChat(chatMessage.getSender() + SEPARATOR + chatMessage.getContent());
     }
 
-    private void handleUserList(UserList userList) {
-        client.updateUserList(userList.getUsers());
+    private void handleUserList(UserListMessage userListMessage) {
+        client.updateUserList(userListMessage.getUsers());
     }
 }

@@ -2,8 +2,9 @@ package ru.kogtev.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ru.kogtev.common.ChatMessage;
 import ru.kogtev.common.Message;
-import ru.kogtev.common.UserList;
+import ru.kogtev.common.UserListMessage;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -11,7 +12,6 @@ import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -75,8 +75,9 @@ public class Server {
         } finally {
             usernameLock.unlock();
         }
-        broadcastUserList();
-        broadcastMessage(new Message(username, " has left the chat"));
+
+        broadcastMessage(new ChatMessage(username, " has left the chat"));
+        broadcastMessage(new UserListMessage(usernames));
     }
 
     public Set<String> getUsernames() {
@@ -96,19 +97,6 @@ public class Server {
             }
         } catch (IOException e) {
             System.out.println("The message was not sent" + e.getMessage());
-        }
-    }
-
-    public void broadcastUserList() {
-        UserList userList = new UserList(usernames);
-        String jsonUserList;
-        try {
-            jsonUserList = objectMapper.writeValueAsString(userList);
-            for (ClientHandler client : clients) {
-                client.sendUser(jsonUserList);
-            }
-        } catch (IOException e) {
-            System.out.println("The usernames was not sent" + e.getMessage());
         }
     }
 
