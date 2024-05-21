@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class ServerListener implements Runnable {
+    private static final String SEPARATOR = ": ";
+
     private final Socket socket;
     private final ObjectMapper objectMapper;
     private final Client client;
@@ -59,7 +61,7 @@ public class ServerListener implements Runnable {
     }
 
     private void handleMessage(Message message) {
-        client.appendMessageToChat(message.getSender() + message.getContent());
+        client.appendMessageToChat(message.getSender() + SEPARATOR + message.getContent());
     }
 
     private void handleUserList(UserList userList) {

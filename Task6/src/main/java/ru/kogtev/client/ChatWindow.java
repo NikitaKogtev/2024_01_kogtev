@@ -18,7 +18,7 @@ public class ChatWindow extends JFrame {
     public ChatWindow(Client client) {
         this.client = client;
 
-        initializeServerAddress();
+        //    initializeServerAddress();
 
         initializeUsername();
 

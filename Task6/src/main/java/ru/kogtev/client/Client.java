@@ -21,7 +21,7 @@ public class Client {
     public void execute() {
         Socket socket;
         try {
-            socket = new Socket(chatWindow.getServerAddress(), PORT);
+            socket = new Socket("localhost", PORT);
             writer = new PrintWriter(socket.getOutputStream(), true);
 
             writer.println(chatWindow.getUsername());

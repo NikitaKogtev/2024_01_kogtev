@@ -9,8 +9,16 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+
     static Set<String> usernames = new HashSet<>();
     static List<ClientHandler> clients = new ArrayList<>();
 
@@ -18,8 +26,12 @@ public class Server {
 
     private final int port;
 
+    private final ExecutorService executorService;
+    private static final Lock usernameLock = new ReentrantLock();
+
     public Server() {
         this.port = ConfigManager.getProperty();
+        this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         this.objectMapper = new ObjectMapper();
     }
 
@@ -33,10 +45,12 @@ public class Server {
                 System.out.println("New client connected");
                 ClientHandler clientHandler = new ClientHandler(clientSocket, this); // Создаем обработчик клиента
                 clients.add(clientHandler);
-                new Thread(clientHandler).start();
+                executorService.execute(clientHandler);
             }
         } catch (IOException e) {
             System.out.println("The client has not been accept" + e.getMessage());
+        } finally {
+            shutdownExecutorService();
         }
 
     }
@@ -46,16 +60,31 @@ public class Server {
     }
 
     public void addUsername(String username) {
-        usernames.add(username);
+        usernameLock.lock();
+        try {
+            usernames.add(username);
+        } finally {
+            usernameLock.unlock();
+        }
     }
 
     public void removeUsername(String username) {
-        usernames.remove(username);
+        usernameLock.lock();
+        try {
+            usernames.remove(username);
+        } finally {
+            usernameLock.unlock();
+        }
         broadcastUserList();
+        broadcastMessage(new Message(username, " has left the chat"));
     }
 
     public Set<String> getUsernames() {
         return usernames;
+    }
+
+    public Lock getUsernameLock() {
+        return usernameLock;
     }
 
     public void broadcastMessage(Message message) {
@@ -83,5 +112,18 @@ public class Server {
         }
     }
 
-
+    private void shutdownExecutorService() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                    System.out.println("Executor service did not terminate");
+                }
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
 }
