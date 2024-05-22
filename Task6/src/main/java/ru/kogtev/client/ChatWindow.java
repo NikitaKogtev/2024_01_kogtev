@@ -4,6 +4,7 @@ package ru.kogtev.client;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class ChatWindow extends JFrame {
 
@@ -12,46 +13,40 @@ public class ChatWindow extends JFrame {
     private JList<String> userList;
 
     private final Client client;
-    private String serverAddress;
-    private String port;
-    private String username;
 
     public ChatWindow(Client client) {
         this.client = client;
-
-        //    initializeServerAddress();
-
-        initializeUsername();
-
-        initialize();
     }
 
-    private void initializeServerAddress() {
-        serverAddress = JOptionPane.showInputDialog(this, "Enter server address:",
+    public String initializeServerAddress() {
+        String serverAddress = JOptionPane.showInputDialog(this, "Enter server address:",
                 "Connect settings", JOptionPane.QUESTION_MESSAGE);
         if (serverAddress == null) {
             System.exit(2);
         }
+        return serverAddress;
     }
 
-    private void initializePort() {
-        port = JOptionPane.showInputDialog(this, "Enter port:",
+    public int initializePort() {
+        String port = JOptionPane.showInputDialog(this, "Enter port:",
                 "Port settings", JOptionPane.QUESTION_MESSAGE);
         if (port == null) {
             System.exit(2);
         }
+        return Integer.parseInt(port);
     }
 
-    private void initializeUsername() {
-        username = JOptionPane.showInputDialog(this, "Enter your name:",
+    public String initializeUsername() {
+        String username = JOptionPane.showInputDialog(this, "Enter your name:",
                 "Your name", JOptionPane.QUESTION_MESSAGE);
         if (username == null) {
             System.exit(2);
         }
+        return username;
     }
 
 
-    private void initialize() {
+    public void initialize(Consumer<String> messageSender, String username) {
         JTextField messageField;
         JButton sendButton;
         JFrame frame;
@@ -80,7 +75,7 @@ public class ChatWindow extends JFrame {
         sendButton.addActionListener(e -> {
             String message = messageField.getText().trim();
             if (!message.isEmpty()) {
-                client.sendMessageToServer(message);
+                messageSender.accept(message);
                 messageField.setText("");
             }
         });
@@ -103,17 +98,9 @@ public class ChatWindow extends JFrame {
     }
 
     public void appendMessage(String message) {
-        setTitle(username);
         chatArea.append(message + "\n");
     }
 
-    public String getServerAddress() {
-        return serverAddress;
-    }
-
-    public String getUsername() {
-        return username;
-    }
 
     public void updateUserList(Set<String> users) {
         DefaultListModel<String> listModel = new DefaultListModel<>();
@@ -122,8 +109,7 @@ public class ChatWindow extends JFrame {
         for (String user : users) {
             listModel.addElement(user);
         }
-
-        this.userList.setModel(listModel);
+        userList.setModel(listModel);
     }
 }
 

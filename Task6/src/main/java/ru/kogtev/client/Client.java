@@ -1,5 +1,7 @@
 package ru.kogtev.client;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -7,11 +9,14 @@ import java.util.Date;
 import java.util.Set;
 
 public class Client {
-    public static final int PORT = 8899;
-
-    private PrintWriter writer;
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String SEPARATOR = ": ";
 
     private final ChatWindow chatWindow;
+
+    private String username;
+
+    private PrintWriter writer;
 
     public Client() {
         chatWindow = new ChatWindow(this);
@@ -19,16 +24,22 @@ public class Client {
 
 
     public void execute() {
-        Socket socket;
+        String serverAddress = chatWindow.initializeServerAddress();
+        int port = chatWindow.initializePort();
+        username = chatWindow.initializeUsername();
+
+
         try {
-            socket = new Socket("localhost", PORT);
+            Socket socket = new Socket(serverAddress, port);
             writer = new PrintWriter(socket.getOutputStream(), true);
 
-            writer.println(chatWindow.getUsername());
+            chatWindow.initialize(this::sendMessageToServer, username);
+
             appendMessageToChat("Connected to the server");
 
-            ServerListener serverListener = new ServerListener(socket, this);
-            new Thread(serverListener).start();
+            new Thread(new ServerListener(socket, this)).start();
+
+            writer.println(username);
         } catch (IOException e) {
             appendMessageToChat("Error connecting to the server: " + e.getMessage());
         }
@@ -43,13 +54,11 @@ public class Client {
     }
 
     public void appendMessageToChat(String message) {
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        chatWindow.appendMessage(timestamp + ": " + message);
+        String timestamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
+        chatWindow.appendMessage(timestamp + SEPARATOR + message);
     }
 
     public void updateUserList(Set<String> users) {
         chatWindow.updateUserList(users);
     }
-
-
 }
