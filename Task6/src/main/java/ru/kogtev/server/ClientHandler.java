@@ -1,8 +1,11 @@
 package ru.kogtev.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ru.kogtev.common.ChatMessage;
-import ru.kogtev.common.Message;
 import ru.kogtev.common.UserListMessage;
 
 import java.io.*;
@@ -10,9 +13,9 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientHandler implements Runnable {
+    private static final Logger logger = LogManager.getLogger(ClientHandler.class);
     private static final String SERVER_NAME = "Server";
 
     private final Socket clientSocket;
@@ -39,16 +42,14 @@ public class ClientHandler implements Runnable {
 
             writer = new PrintWriter(outputStreamWriter, true);
 
-            // Выполнение процесса подключения пользователя
             connectUser(reader);
 
-            // Чтение и обработка обычных сообщений
             String inputLine;
             while ((inputLine = reader.readLine()) != null) {
                 server.broadcastMessage(new ChatMessage(username, inputLine));
             }
         } catch (IOException e) {
-            System.out.println("The message was not sent: " + e.getMessage());
+            logger.warn("Сообщение не было отправлено {}", e.getMessage());
         } finally {
             closeConnection();
         }
@@ -62,24 +63,26 @@ public class ClientHandler implements Runnable {
 
             while (true) {
                 if (usernameLock.tryLock(5, TimeUnit.SECONDS)) {
-                    System.out.println("Заблокирован");
+                    logger.info("Поток заблокирован");
                     try {
                         if (isUsernameAvailable(username)) {
                             server.addUsername(username);
-                            System.out.println("Добавляем юзера");
+                            logger.info("Добавляем юзера - {}", username);
+                            usernameLock.unlock();
                             break;
                         }
                     } finally {
-                        System.out.println("Разблокирован");
+                        logger.info("Поток разблокирован");
                         usernameLock.unlock();
                     }
                 }
 
-                System.out.println("Вводим еще раз пользователя");
+                logger.info("Вводим еще раз пользователя");
                 writer.println(objectMapper.writeValueAsString(new ChatMessage(SERVER_NAME,
                         "This username is already taken. Please enter a different username: ")));
                 username = reader.readLine();
             }
+
 
             writer.println(objectMapper.writeValueAsString(new ChatMessage(SERVER_NAME,
                     "Welcome to the chat, " + username + "!")));
@@ -87,7 +90,8 @@ public class ClientHandler implements Runnable {
             server.broadcastMessage(new ChatMessage(SERVER_NAME, username + " has joined the chat"));
             server.broadcastMessage(new UserListMessage(server.getUsernames()));
         } catch (IOException | InterruptedException e) {
-            System.out.println("Error while setting username: " + e.getMessage());
+            logger.info("Ошибка при установке имени пользователя {}", e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -98,6 +102,7 @@ public class ClientHandler implements Runnable {
 
 
     public boolean isUsernameAvailable(String username) {
+        logger.info("Доступно ли имя пользователя");
         return !server.getUsernames().contains(username);
     }
 
@@ -111,8 +116,9 @@ public class ClientHandler implements Runnable {
         try {
             clientSocket.close();
         } catch (IOException e) {
-            System.out.println("The client socket could not be closed: " + e.getMessage());
+            logger.warn("Сокет клиента не был закрыт {}", e.getMessage());
         }
         server.removeClient(this);
+        logger.warn("Коннект закрыт");
     }
 }

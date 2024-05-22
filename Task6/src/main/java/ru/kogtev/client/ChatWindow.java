@@ -1,29 +1,29 @@
 
 package ru.kogtev.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
 import java.util.function.Consumer;
 
 public class ChatWindow extends JFrame {
+    private static final Logger logger = LogManager.getLogger(ChatWindow.class);
 
     private JTextArea chatArea;
 
     private JList<String> userList;
 
-    private final Client client;
-
-    public ChatWindow(Client client) {
-        this.client = client;
-    }
-
     public String initializeServerAddress() {
         String serverAddress = JOptionPane.showInputDialog(this, "Enter server address:",
                 "Connect settings", JOptionPane.QUESTION_MESSAGE);
         if (serverAddress == null) {
+            logger.warn("Передали пустое значение сервера - exit");
             System.exit(2);
         }
+        logger.info("Подключение к серверу с адресом - {}", serverAddress);
         return serverAddress;
     }
 
@@ -31,8 +31,10 @@ public class ChatWindow extends JFrame {
         String port = JOptionPane.showInputDialog(this, "Enter port:",
                 "Port settings", JOptionPane.QUESTION_MESSAGE);
         if (port == null) {
+            logger.warn("Передали пустое значение порта - exit");
             System.exit(2);
         }
+        logger.info("Подключение к серверу с портом - {}", port);
         return Integer.parseInt(port);
     }
 
@@ -40,13 +42,15 @@ public class ChatWindow extends JFrame {
         String username = JOptionPane.showInputDialog(this, "Enter your name:",
                 "Your name", JOptionPane.QUESTION_MESSAGE);
         if (username == null) {
+            logger.warn("Передали пустое значение имени - exit");
             System.exit(2);
         }
+        logger.info("Подключение к серверу с именем - {}", username);
         return username;
     }
 
 
-    public void initialize(Consumer<String> messageSender, String username) {
+    public void initializeChat(Consumer<String> messageSender, String username) {
         JTextField messageField;
         JButton sendButton;
         JFrame frame;
@@ -95,10 +99,12 @@ public class ChatWindow extends JFrame {
         userListPanel.add(userListScrollPane, BorderLayout.CENTER);
 
         frame.setVisible(true);
+        logger.info("Чат инициализирован");
     }
 
     public void appendMessage(String message) {
         chatArea.append(message + "\n");
+        logger.info("Сообщение отправлено в чат");
     }
 
 
@@ -110,6 +116,7 @@ public class ChatWindow extends JFrame {
             listModel.addElement(user);
         }
         userList.setModel(listModel);
+        logger.info("Обновлен список подключенных пользователей");
     }
 }
 

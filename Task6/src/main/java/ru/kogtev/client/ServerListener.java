@@ -2,6 +2,10 @@ package ru.kogtev.client;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ru.kogtev.common.ChatMessage;
 import ru.kogtev.common.Message;
 import ru.kogtev.common.UserListMessage;
@@ -13,6 +17,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class ServerListener implements Runnable {
+    private static final Logger logger = LogManager.getLogger(ServerListener.class);
+
     private static final String SEPARATOR = ": ";
 
     private final Socket socket;
@@ -38,12 +44,12 @@ public class ServerListener implements Runnable {
             }
 
         } catch (IOException e) {
-            System.out.println("The socket has not been received " + e.getMessage());
+            logger.warn("Сокет не был получен {}", e.getMessage());
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                System.out.println("The socket could not be closed " + e.getMessage());
+                logger.warn("Сокет получилось закрыть {}", e.getMessage());
             }
         }
     }
@@ -61,10 +67,10 @@ public class ServerListener implements Runnable {
                     handleUserList((UserListMessage) message);
                     break;
                 default:
-                    System.out.println("Unknown message type received: " + messageType);
+                    logger.warn("Неизвестный тип сообщения - {}", messageType);
             }
         } catch (IOException e) {
-            System.out.println("The message cannot be processed: " + e.getMessage());
+            logger.warn("Сообщение не может быть преобразовано - {}", e.getMessage());
         }
     }
 

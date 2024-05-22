@@ -2,6 +2,9 @@ package ru.kogtev.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ru.kogtev.common.ChatMessage;
 import ru.kogtev.common.Message;
 import ru.kogtev.common.UserListMessage;
@@ -10,6 +13,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +21,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
+    private static final Logger logger = LogManager.getLogger(Server.class);
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     static Set<String> usernames = new HashSet<>();
@@ -38,17 +43,19 @@ public class Server {
     public void execute() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            System.out.println("Server is running on port " + port);
+            logger.info("Сервер запущен c портом {}", port);
 
             while (true) {
-                Socket clientSocket = serverSocket.accept(); // Принимаем входящее подключение
-                System.out.println("New client connected");
-                ClientHandler clientHandler = new ClientHandler(clientSocket, this); // Создаем обработчик клиента
+                Socket clientSocket = serverSocket.accept();
+                logger.info("Подключился новый клиент");
+
+                ClientHandler clientHandler = new ClientHandler(clientSocket, this);
                 clients.add(clientHandler);
+
                 executorService.execute(clientHandler);
             }
         } catch (IOException e) {
-            System.out.println("The client has not been accept" + e.getMessage());
+            logger.error("Клиент не подключился {}", e.getMessage());
         } finally {
             shutdownExecutorService();
         }
@@ -66,6 +73,7 @@ public class Server {
         } finally {
             usernameLock.unlock();
         }
+        logger.info("Добавляем {} в множество пользователей", username);
     }
 
     public void removeUsername(String username) {
@@ -78,6 +86,7 @@ public class Server {
 
         broadcastMessage(new ChatMessage(username, " has left the chat"));
         broadcastMessage(new UserListMessage(usernames));
+        logger.info("Удаляем {} из множество пользователей", username);
     }
 
     public Set<String> getUsernames() {
@@ -96,7 +105,7 @@ public class Server {
                 client.sendMessage(jsonMessage);
             }
         } catch (IOException e) {
-            System.out.println("The message was not sent" + e.getMessage());
+            logger.warn("Сообщение не было отправлено {}", e.getMessage());
         }
     }
 
@@ -106,12 +115,13 @@ public class Server {
             if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
                 executorService.shutdownNow();
                 if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                    System.out.println("Executor service did not terminate");
+                    logger.warn("Работа executor service не была прекращена");
                 }
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
+        logger.warn("Работа executor service прекращена");
     }
 }
