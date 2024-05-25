@@ -1,7 +1,6 @@
 package ru.kogtev;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,12 +94,12 @@ public class ClientHandler implements Runnable {
     }
 
 
-    public boolean isUsernameAvailable(String username) {
+    private boolean isUsernameAvailable(String username) {
         logger.info("Доступно ли имя пользователя");
         return !server.getUsernames().contains(username);
     }
 
-    public void closeConnection() {
+    private void closeConnection() {
         if (username != null) {
             server.removeUsername(username);
         }

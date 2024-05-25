@@ -12,4 +12,9 @@
             <AppenderRef ref="LogToConsole"/>
         </Root>
     </Loggers>
+
+    <Properties>
+        <Property name="log4j2.encoding">UTF-8</Property>
+    </Properties>
+
 </Configuration>
