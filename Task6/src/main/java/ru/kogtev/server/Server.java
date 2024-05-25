@@ -22,12 +22,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
-    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     static Set<String> usernames = new HashSet<>();
     static List<ClientHandler> clients = new ArrayList<>();
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final int port;
 
@@ -35,9 +34,8 @@ public class Server {
     private static final Lock usernameLock = new ReentrantLock();
 
     public Server() {
-        this.port = ConfigManager.getProperty();
-        this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-        this.objectMapper = new ObjectMapper();
+        port = ConfigManager.getProperty();
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     public void execute() {
@@ -115,13 +113,13 @@ public class Server {
             if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
                 executorService.shutdownNow();
                 if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                    logger.warn("Работа executor service не была прекращена");
+                    logger.warn("Работа executor service сервера не была прекращена");
                 }
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        logger.warn("Работа executor service прекращена");
+        logger.warn("Работа executor service сервера прекращена");
     }
 }

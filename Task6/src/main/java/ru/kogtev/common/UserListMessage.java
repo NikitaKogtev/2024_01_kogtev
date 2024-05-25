@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import java.util.Set;
 
-@JsonTypeName("userList")
+@JsonTypeName("USER_LIST")
 public class UserListMessage extends Message {
     private final Set<String> users;
 

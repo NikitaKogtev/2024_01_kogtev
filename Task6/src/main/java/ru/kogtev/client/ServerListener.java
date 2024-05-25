@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import ru.kogtev.common.ChatMessage;
 import ru.kogtev.common.Message;
+import ru.kogtev.common.MessageType;
 import ru.kogtev.common.UserListMessage;
 
 import java.io.BufferedReader;
@@ -22,19 +23,19 @@ public class ServerListener implements Runnable {
     private static final String SEPARATOR = ": ";
 
     private final Socket socket;
-    private final ObjectMapper objectMapper;
     private final Client client;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ServerListener(Socket socket, Client client) {
         this.socket = socket;
         this.client = client;
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override
     public void run() {
         try (InputStreamReader inputStreamReader =
-                     new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8);
+                     new InputStreamReader(socket.getInputStream());
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
 
             String jsonMessage;
@@ -59,11 +60,11 @@ public class ServerListener implements Runnable {
             Message message = objectMapper.readValue(jsonMessage, Message.class);
             String messageType = message.getClass().getAnnotation(JsonTypeName.class).value();
 
-            switch (messageType) {
-                case "message":
+            switch (MessageType.valueOf(messageType)) {
+                case MESSAGE:
                     handleMessage((ChatMessage) message);
                     break;
-                case "userList":
+                case USER_LIST:
                     handleUserList((UserListMessage) message);
                     break;
                 default:

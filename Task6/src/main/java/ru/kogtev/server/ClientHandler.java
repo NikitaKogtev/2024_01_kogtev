@@ -23,21 +23,20 @@ public class ClientHandler implements Runnable {
 
     private String username;
     private PrintWriter writer;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public ClientHandler(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override
     public void run() {
         try (OutputStreamWriter outputStreamWriter =
-                     new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8);
+                     new OutputStreamWriter(clientSocket.getOutputStream());
              InputStreamReader inputStreamReader =
-                     new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8);
+                     new InputStreamReader(clientSocket.getInputStream());
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
 
             writer = new PrintWriter(outputStreamWriter, true);
@@ -68,7 +67,6 @@ public class ClientHandler implements Runnable {
                         if (isUsernameAvailable(username)) {
                             server.addUsername(username);
                             logger.info("Добавляем юзера - {}", username);
-                            usernameLock.unlock();
                             break;
                         }
                     } finally {

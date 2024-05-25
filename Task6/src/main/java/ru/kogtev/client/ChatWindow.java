@@ -104,9 +104,7 @@ public class ChatWindow extends JFrame {
 
     public void appendMessage(String message) {
         chatArea.append(message + "\n");
-        logger.info("Сообщение отправлено в чат");
     }
-
 
     public void updateUserList(Set<String> users) {
         DefaultListModel<String> listModel = new DefaultListModel<>();
