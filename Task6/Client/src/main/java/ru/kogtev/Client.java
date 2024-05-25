@@ -12,11 +12,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Client {
     private static final Logger logger = LogManager.getLogger(Client.class);
 
-    private static final String TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    private static final AtomicReference<SimpleDateFormat> SIMPLE_DATE_FORMAT =
+            new AtomicReference<>(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     private static final String SEPARATOR = ": ";
 
     private final ChatWindow chatWindow;
@@ -63,7 +65,8 @@ public class Client {
     }
 
     public void appendMessageToChat(String message) {
-        chatWindow.appendMessage(TIMESTAMP + SEPARATOR + message);
+        String timestamp = SIMPLE_DATE_FORMAT.get().format(new Date());
+        chatWindow.appendMessage(timestamp + SEPARATOR + message);
     }
 
     public void updateUserList(Set<String> users) {
