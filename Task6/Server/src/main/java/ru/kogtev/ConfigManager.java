@@ -1,4 +1,4 @@
-package ru.kogtev.server;
+package ru.kogtev;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,6 +9,7 @@ import java.util.Properties;
 
 public final class ConfigManager {
     private static final Logger logger = LogManager.getLogger(ConfigManager.class);
+    
     private static final String PROPERTIES_FILE_NAME = "chat.properties";
     private static final String PORT_VALUE_IN_PROPERTIES_FILE = "PORT";
     private static final int DEFAULT_PORT_VALUE = 8899;

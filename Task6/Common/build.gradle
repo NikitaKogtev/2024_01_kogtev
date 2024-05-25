@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group = 'ru.kogtev'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.1'
+}

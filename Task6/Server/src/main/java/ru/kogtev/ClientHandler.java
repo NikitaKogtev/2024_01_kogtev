@@ -1,16 +1,12 @@
-package ru.kogtev.server;
+package ru.kogtev;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import ru.kogtev.common.ChatMessage;
-import ru.kogtev.common.UserListMessage;
-
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 

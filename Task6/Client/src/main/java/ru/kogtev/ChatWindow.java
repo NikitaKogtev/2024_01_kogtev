@@ -1,5 +1,4 @@
-
-package ru.kogtev.client;
+package ru.kogtev;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,7 +47,6 @@ public class ChatWindow extends JFrame {
         logger.info("Подключение к серверу с именем - {}", username);
         return username;
     }
-
 
     public void initializeChat(Consumer<String> messageSender, String username) {
         JTextField messageField;

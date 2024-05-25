@@ -1,13 +1,13 @@
-package ru.kogtev.server;
+package ru.kogtev;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import ru.kogtev.common.ChatMessage;
-import ru.kogtev.common.Message;
-import ru.kogtev.common.UserListMessage;
+import ru.kogtev.ChatMessage;
+import ru.kogtev.Message;
+import ru.kogtev.UserListMessage;
 
 import java.io.*;
 import java.net.ServerSocket;

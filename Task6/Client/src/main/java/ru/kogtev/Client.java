@@ -1,4 +1,4 @@
-package ru.kogtev.client;
+package ru.kogtev;
 
 import java.io.*;
 import java.net.Socket;

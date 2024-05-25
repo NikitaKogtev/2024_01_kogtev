@@ -1,4 +1,4 @@
-package ru.kogtev.server;
+package ru.kogtev;
 
 public class ServerMain {
     public static void main(String[] args) {

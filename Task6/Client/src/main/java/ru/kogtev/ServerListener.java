@@ -1,4 +1,4 @@
-package ru.kogtev.client;
+package ru.kogtev;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,16 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import ru.kogtev.common.ChatMessage;
-import ru.kogtev.common.Message;
-import ru.kogtev.common.MessageType;
-import ru.kogtev.common.UserListMessage;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class ServerListener implements Runnable {
     private static final Logger logger = LogManager.getLogger(ServerListener.class);
