@@ -18,12 +18,13 @@ public class ClientHandler implements Runnable {
 
     private String username;
     private PrintWriter writer;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
 
-    public ClientHandler(Socket clientSocket, Server server) {
+    public ClientHandler(Socket clientSocket, Server server, ObjectMapper objectMapper) {
         this.clientSocket = clientSocket;
         this.server = server;
+        this.objectMapper = objectMapper;
     }
 
     @Override

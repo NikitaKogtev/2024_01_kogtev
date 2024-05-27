@@ -20,6 +20,7 @@ public class Client {
     private static final AtomicReference<SimpleDateFormat> SIMPLE_DATE_FORMAT =
             new AtomicReference<>(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     private static final String SEPARATOR = ": ";
+    private static final int AWAIT_TERMINATION_SECONDS = 60;
 
     private final ChatWindow chatWindow;
 
@@ -77,9 +78,9 @@ public class Client {
     private void shutdownExecutorService() {
         executorService.shutdown();
         try {
-            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+            if (!executorService.awaitTermination(AWAIT_TERMINATION_SECONDS, TimeUnit.SECONDS)) {
                 executorService.shutdownNow();
-                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                if (!executorService.awaitTermination(AWAIT_TERMINATION_SECONDS, TimeUnit.SECONDS)) {
                     logger.warn("Работа executor service клиента не была прекращена");
                 }
             }

@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
+    private static final int AWAIT_TERMINATION_SECONDS = 60;
 
     static Set<String> usernames = new HashSet<>();
     static List<ClientHandler> clients = new ArrayList<>();
@@ -27,12 +28,11 @@ public class Server {
 
     private final int port;
 
-    private final ExecutorService executorService;
+    private ExecutorService executorService;
     private static final Lock usernameLock = new ReentrantLock();
 
     public Server() {
         port = ConfigManager.getProperty();
-        executorService = Executors.newSingleThreadExecutor();
     }
 
     public void execute() {
@@ -41,10 +41,11 @@ public class Server {
             logger.info("Сервер запущен c портом {}", port);
 
             while (true) {
+                executorService = Executors.newSingleThreadExecutor();
                 Socket clientSocket = serverSocket.accept();
                 logger.info("Подключился новый клиент");
 
-                ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+                ClientHandler clientHandler = new ClientHandler(clientSocket, this, objectMapper);
                 clients.add(clientHandler);
 
                 executorService.execute(clientHandler);
@@ -107,9 +108,9 @@ public class Server {
     private void shutdownExecutorService() {
         executorService.shutdown();
         try {
-            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+            if (!executorService.awaitTermination(AWAIT_TERMINATION_SECONDS, TimeUnit.SECONDS)) {
                 executorService.shutdownNow();
-                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                if (!executorService.awaitTermination(AWAIT_TERMINATION_SECONDS, TimeUnit.SECONDS)) {
                     logger.warn("Работа executor service сервера не была прекращена");
                 }
             }
